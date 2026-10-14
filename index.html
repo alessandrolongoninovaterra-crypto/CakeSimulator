@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Zeelandia Cake Contest</title>
+<title>Zeelandia Cake Designer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* Layout: full-screen app. Organizer = timer panel + team grid. Team page = header, cake canvas | product tiles over the cake layer list, footer. */
+    /* Layout: full-screen designer. Header with cake name, cake canvas | product tiles over the cake layer list, footer. */
     --bg:#FFFFFF;
     --bg-2:#F7F5FA;
     --bg-3:#EFECF4;
@@ -32,7 +32,7 @@
     color-scheme:light;
   }
   *{box-sizing:border-box;}
-  html, body{height:100%; margin:0; overflow:hidden; background:var(--bg-3); color:var(--ink); font-family:var(--body);}
+  html,body{height:100%; margin:0; overflow:hidden; background:var(--bg-3); color:var(--ink); font-family:var(--body);}
   body,div,button,input,h1,h2,h3,p,span{margin:0;padding:0;}
   button,input,select,textarea{font:inherit;color:inherit;}
   button{touch-action:manipulation;}
@@ -49,68 +49,6 @@
     display:flex; flex-direction:column;
   }
   #pc-app{flex:1; min-height:0; display:flex; flex-direction:column;}
-
-  /* ===================== TOPBAR + WAVE ===================== */
-  .pc-topbar{
-    background:var(--purple); color:#fff;
-    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 14px;
-    padding:14px 24px 20px; position:relative; z-index:2; flex-shrink:0;
-  }
-  .pc-brand{font-family:var(--display); font-weight:900; font-size:21px; letter-spacing:-.01em; display:flex; align-items:center; gap:9px;}
-  .pc-brand-mark{width:13px; height:13px; background:var(--yellow); border-radius:50%; display:inline-block; flex-shrink:0;}
-  .pc-topbar-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
-  .pc-topbar-meta{font-size:11.5px; color:#CBB9E8; font-weight:600; letter-spacing:.04em; text-align:right;}
-  .pc-btn.ghost-inv{background:rgba(255,255,255,0.1); border:1.5px solid rgba(255,255,255,0.3); color:#fff;}
-  .pc-btn.ghost-inv:hover{background:rgba(255,255,255,0.18);}
-  .pc-wave{position:relative; display:block; width:100%; height:14px; margin-top:-1px; flex-shrink:0;}
-
-  /* ===================== DASHBOARD GRID ===================== */
-  .pc-dash-grid{
-    flex:1; min-height:0;
-    display:grid;
-    grid-template-columns: 400px 1fr;
-    gap:16px;
-    padding:16px;
-    align-items:stretch;
-  }
-  @media (max-width: 899px){
-    .pc-dash-grid{ grid-template-columns: 1fr; overflow-y:auto; }
-  }
-
-  .pc-panel{
-    background:var(--bg); border:1px solid var(--line); border-radius:var(--radius);
-    padding:18px; display:flex; flex-direction:column; position:relative; overflow:hidden;
-    box-shadow:0 2px 10px rgba(29,5,61,0.04); min-height:0;
-  }
-  .pc-panel-title{
-    font-family:var(--display); font-weight:800; font-size:13.5px; color:var(--purple);
-    text-transform:uppercase; letter-spacing:.06em; display:flex; align-items:baseline; gap:8px;
-    margin-bottom:12px; flex-shrink:0;
-  }
-  .pc-panel-title span{font-family:var(--body); font-weight:500; font-size:11px; color:var(--ink-dim); text-transform:none; letter-spacing:0;}
-
-  /* ---- timer panel ---- */
-  .pc-panel-timer{align-items:center; text-align:center; justify-content:flex-start; gap:6px;}
-  .pc-turno-pills{display:flex; gap:6px; width:100%; margin-bottom:10px;}
-  .pc-turno-badge{
-    flex:1; font-family:var(--display); font-weight:800; font-size:11.5px; padding:7px 6px;
-    border-radius:8px; background:var(--bg-2); border:1.5px solid var(--line); color:var(--ink-dim);
-  }
-  .pc-turno-badge.active{background:var(--yellow); color:var(--purple); border-color:var(--yellow-dark);}
-
-  @keyframes ring{0%,100%{transform:rotate(0deg);}25%{transform:rotate(-3deg);}75%{transform:rotate(3deg);}}
-
-  .pc-phase-pills{display:flex; gap:4px; width:100%; margin-top:8px;}
-  .pc-phase-pill{
-    flex:1; font-size:9.5px; font-weight:700; text-align:center; padding:5px 2px; border-radius:6px;
-    border:1px solid transparent; line-height:1.2; text-transform:uppercase; letter-spacing:.01em;
-    transition:all .3s ease;
-  }
-
-  .pc-timer-controls{width:100%; display:flex; flex-direction:column; gap:8px; margin-top:auto; padding-top:12px;}
-  .pc-timer-controls .row{display:flex; gap:8px;}
-  .pc-timer-controls .row > *{flex:1;}
-
   /* ---- buttons ---- */
   .pc-btn{
     padding:11px; border-radius:10px; border:none; cursor:pointer;
@@ -122,85 +60,20 @@
   .pc-btn.primary{background:var(--purple); color:#fff;}
   .pc-btn:disabled{background:var(--bg-3); color:var(--ink-dim); border-color:var(--line); cursor:not-allowed; transform:none;}
   .pc-btn.ghost{background:transparent; border:1.5px solid var(--purple); color:var(--purple);}
-  .pc-btn.dark{background:var(--purple); color:#fff;}
   .pc-btn.gold{background:var(--yellow); color:var(--purple);}
   .pc-btn.armed{background:var(--red); border-color:var(--red); color:#fff;}
   .pc-btn.small{padding:8px 12px; font-size:12.5px; border-radius:8px;}
-
-  /* ---- team grid ---- */
-  .pc-panel-teams{overflow:hidden;}
-  .pc-team-grid{
-    display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3, 1fr);
-    gap:10px; flex:1; min-height:0;
-  }
-  @media (max-width: 899px){ .pc-team-grid{grid-template-rows:none !important;} }
-  .pc-tile{
-    background:var(--bg-2); border:1.5px solid var(--line); border-left:4px solid var(--line);
-    border-radius:12px; padding:12px 13px; cursor:pointer; text-align:left; width:100%;
-    display:flex; align-items:center; gap:12px;
-    transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease; min-height:0;
-  }
-  .pc-tile:hover{transform:translateY(-2px); box-shadow:0 8px 18px rgba(29,5,61,0.1); border-color:var(--purple);}
-  .pc-tile.t-live{border-left-color:var(--yellow); background:var(--yellow-soft);}
-  .pc-tile.t-done{border-left-color:var(--purple); background:var(--purple-soft);}
-  .pc-tile.t-over{border-left-color:var(--ink-dim); opacity:.8;}
-  .pc-tile-body{flex:1; min-width:0; display:flex; flex-direction:column; justify-content:space-between; gap:4px; align-self:stretch;}
-  .pc-tile-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
-  .pc-tile-round{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim);}
-  .pc-tile-name{font-family:var(--display); font-size:clamp(17px,2.3vw,26px); font-weight:900; line-height:1.08; color:var(--purple); letter-spacing:-.01em; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow-wrap:break-word;}
-  .pc-tile-pizza{font-size:11px; color:var(--ink-dim); font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .pc-tile-thumb{flex:none; height:100%; max-height:92px; aspect-ratio:1; width:auto; display:block;}
-
-  .pc-pill{
-    display:inline-flex; align-items:center; gap:5px;
-    padding:3px 9px; border-radius:99px; font-size:9.5px; font-weight:700;
-    text-transform:uppercase; letter-spacing:.03em; white-space:nowrap;
-  }
-  .pc-pill.wait{background:var(--bg-3); color:var(--ink-dim);}
-  .pc-pill.live{background:var(--yellow); color:var(--purple);}
-  .pc-pill.done{background:var(--purple); color:#fff;}
-  .pc-pill.over{background:var(--purple-dark); color:var(--yellow);}
-  .pc-pill .dot{width:5px; height:5px; border-radius:50%; background:currentColor;}
-  .pc-pill.live .dot{animation:pulse 1.2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
-
-  /* ===================== BAKE IT / FINISH POPUP ===================== */
-  .pc-bake-overlay{
-    position:fixed; inset:0; z-index:500; background:rgba(18,2,38,0.94);
-    display:flex; align-items:center; justify-content:center; cursor:pointer;
-    animation:pcFadeIn .2s ease;
-  }
-  @keyframes pcFadeIn{from{opacity:0;}to{opacity:1;}}
-  .pc-bake-box{text-align:center; padding:20px; animation:pcBakePop .4s cubic-bezier(.34,1.56,.64,1);}
-  @keyframes pcBakePop{from{transform:scale(.7); opacity:0;}to{transform:scale(1); opacity:1;}}
-  .pc-bake-emoji{font-size:56px; margin-bottom:6px;}
-  .pc-bake-text{font-family:var(--display); font-weight:900; font-size:58px; color:var(--yellow); letter-spacing:.02em; line-height:1;}
-  .pc-bake-sub{font-size:15px; color:#fff; margin-top:14px; font-weight:600;}
-  .pc-bake-hint{font-size:11px; color:#B7A7CC; margin-top:18px; font-weight:500;}
-
   /* ===================== SECONDARY PAGES ===================== */
   .pc-team-bg{
     flex:1; min-height:0; overflow:hidden; background:var(--bg-3);
     padding:18px 20px 16px; display:flex; flex-direction:column;
   }
-  .pc-team-card-wrap{max-width:1500px; margin:0 auto; width:100%; flex:1; min-height:0; display:flex; flex-direction:column;}
-  .pc-fixed-header{flex-shrink:0;}
-  .pc-fixed-scroll{flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column;}
-  .pc-backlink{
-    display:inline-flex; align-items:center; gap:6px; color:var(--ink-dim); background:none; border:0;
-    font-size:12px; cursor:pointer; margin-bottom:8px; font-weight:600; padding:4px 0;
-  }
-  .pc-backlink:hover{color:var(--purple);}
   .pc-eyebrow{
     font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--purple);
     font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:5px;
   }
   .pc-eyebrow::before{content:""; width:18px; height:4px; background:var(--yellow); display:inline-block;}
   .pc-title{font-family:var(--display); font-weight:900; font-size:22px; line-height:1.08; color:var(--purple); letter-spacing:-0.01em;}
-  .pc-sub{color:var(--ink-dim); font-size:13px; margin-top:5px; line-height:1.4; max-width:62ch;}
-  .pc-header{padding-bottom:12px; border-bottom:3px solid var(--purple); margin-bottom:12px;}
-
-  .pc-card{background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:10px;}
   .pc-field-label{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim); margin-bottom:5px; display:block;}
   .pc-name-input{
     width:100%; background:var(--bg); border:1.5px solid var(--line);
@@ -209,8 +82,6 @@
   }
   .pc-name-input:focus{outline:none; border-color:var(--purple);}
   .pc-name-input:disabled{background:var(--bg-2); color:var(--ink-dim);}
-  .pc-team-top-row{display:flex; flex-wrap:wrap; gap:12px; flex-shrink:0; margin-bottom:10px; align-items:stretch; min-height:140px;}
-
   .pc-recipe-footer{
     flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:10px 14px; flex-wrap:wrap;
     background:var(--bg); border:1.5px solid var(--line); border-radius:14px; padding:9px 16px; margin-top:10px;
@@ -222,75 +93,11 @@
   .pc-footer-note.ok{color:var(--purple);}
   .pc-footer-note.warn{color:var(--red);}
   .pc-footer-btns{display:flex; gap:8px;}
-
-  /* ---- catalogue / settings columns ---- */
-  .pc-cat-columns{display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:10px; flex:1; min-height:0;}
-  .pc-cat-col{
-    display:flex; flex-direction:column; min-height:0; background:var(--bg);
-    border:1px solid var(--line); border-radius:14px; padding:10px; overflow:hidden;
-  }
-  .pc-cat-col-head{flex-shrink:0; margin-bottom:7px;}
-  .pc-cat-col-title{font-family:var(--display); font-size:12px; font-weight:800; color:var(--purple); text-transform:uppercase; letter-spacing:.03em; display:block;}
-  .pc-cat-col-hint{font-size:9.5px; color:var(--ink-dim); font-weight:600; display:block; margin-top:1px;}
-  .pc-ing-rows{flex:1; min-height:0; display:flex; flex-direction:column; gap:5px; overflow:hidden;}
-  .pc-ing-row{
-    flex:1 1 0; max-height:64px; min-height:0; display:flex; align-items:center; gap:9px;
-    background:var(--bg-2); border:1.5px solid var(--line); border-radius:10px;
-    padding:3px 8px; overflow:hidden;
-  }
-  .pc-ing-row-icon{height:90%; max-height:48px; aspect-ratio:1; flex:none; display:grid; place-items:center;}
-  .pc-ing-row-icon img{max-width:100%; max-height:100%; display:block;}
-  .pc-ing-row-name{font-size:11.5px; font-weight:700; color:var(--ink); line-height:1.2; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
-  .pc-cat-col-chips{flex:1; min-height:0; overflow:auto; display:flex; flex-wrap:wrap; align-content:flex-start; gap:5px;}
-
-  /* ---- rules ---- */
-  .pc-rules-textarea{
-    width:100%; flex:1; min-height:0; resize:none; background:var(--bg); border:1.5px solid var(--line);
-    color:var(--ink); padding:10px 12px; border-radius:10px; font-size:13.5px;
-    font-family:var(--body); font-weight:500; line-height:1.5;
-  }
-  .pc-rules-textarea:focus{outline:none; border-color:var(--purple);}
-
-  /* ---- settings ---- */
-  .pc-names-card{margin-bottom:0; flex:0 1 300px; min-width:220px; display:flex; flex-direction:column; max-height:260px;}
-  .pc-names-list{flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; align-content:start; padding-right:4px;}
-  .pc-name-round{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim); margin-top:4px;}
-  .pc-name-round:first-child{margin-top:0;}
-  .pc-setup-card{margin-bottom:0; flex:0 1 560px; min-width:0; display:flex; flex-direction:column;}
-  .pc-setup-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px 12px;}
-  .pc-setup-field{display:grid; gap:3px; min-width:0;}
-  .pc-setup-field span{font-size:11.5px; font-weight:700; color:var(--ink);}
-  .pc-setup-field small{font-size:10.5px; color:var(--ink-dim); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .pc-setup-field .pc-minutes-input{width:100%; padding:6px 8px; font-size:17px;}
-  .pc-timer-controls .row.wrap{display:grid; gap:8px;}
-  .pc-turno-pills{flex-wrap:wrap;}
-  .pc-turno-badge{white-space:nowrap; min-width:0;}
-  .pc-minutes-input{
-    width:80px; background:var(--bg); border:1.5px solid var(--line); color:var(--ink);
-    padding:10px 12px; border-radius:10px; font-size:18px; font-family:var(--display); font-weight:800;
-    text-align:center;
-  }
-  .pc-minutes-input:focus{outline:none; border-color:var(--purple);}
-  .pc-ing-chip{
-    display:inline-flex; align-items:center; gap:7px;
-    border:1.5px solid var(--line); background:var(--bg); color:var(--ink);
-    padding:7px 8px 7px 13px; border-radius:99px; font-size:13px; font-weight:600;
-  }
-  .pc-ing-chip button{
-    background:var(--bg-3); border:none; color:var(--ink-dim); width:22px; height:22px;
-    border-radius:50%; cursor:pointer; font-size:12px; line-height:1; display:flex;
-    align-items:center; justify-content:center; flex-shrink:0;
-  }
-  .pc-ing-chip button:hover{background:var(--purple); color:#fff;}
-  .pc-ing-add-row{display:flex; gap:8px; margin-top:10px; flex-shrink:0;}
-  .pc-ing-add-row input{flex:1; min-width:0;}
   .pc-settings-note{font-size:11.5px; color:var(--ink-dim); margin-top:4px; line-height:1.4;}
-
   /* ===================== PIZZA DESIGNER (team page) ===================== */
   .dz{font-size:clamp(11px,1.55vmin,16px); padding:.9em 16px .9em;}
   .dz-head{display:flex; flex-wrap:wrap; align-items:center; gap:.6em 1.1em; padding-bottom:.7em; border-bottom:3px solid var(--purple); margin-bottom:.8em; flex-shrink:0;}
   .dz-idblock{display:flex; align-items:center; gap:.8em;}
-  .dz-idblock .pc-backlink{margin:0; font-size:.95em;}
   .dz-idblock .pc-eyebrow{margin:0; font-size:.8em;}
   .dz-idblock{min-width:0; max-width:40%;}
   .dz-idblock > div{min-width:0;}
@@ -299,10 +106,6 @@
   .dz-fields label{flex:1; min-width:0;}
   .dz-fields .pc-field-label{font-size:.75em; margin-bottom:.25em;}
   .dz-fields .pc-name-input{font-size:1em; padding:.5em .7em;}
-  .dz-clock{display:flex; flex-direction:column; align-items:flex-end; min-width:6em;}
-  .dz-clock b{font-family:var(--display); font-weight:800; font-size:1.9em; line-height:1; color:var(--purple); font-variant-numeric:tabular-nums;}
-  .dz-clock span{font-size:.75em; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim);}
-
   .dz-bench{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) minmax(24em,34em); gap:.9em;}
   .dz-stage{min-height:0; min-width:0; display:flex; background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:.6em;}
   .dz-stage canvas{width:100%; height:100%; object-fit:contain; display:block;}
@@ -315,14 +118,12 @@
     .dz-side{flex-direction:row;}
     .dz-lib,.dz-rec{flex:1 1 0; min-width:0;}
   }
-
   .dz-tabs{display:flex; flex-wrap:wrap; gap:.3em; flex:none;}
   .dz-tab{border:1.5px solid var(--line); background:var(--bg-2); border-radius:.5em; padding:.35em .7em; min-height:2.5em; font-size:.92em; font-weight:700; cursor:pointer; color:var(--ink);}
   .dz-tab[aria-selected="true"]{background:var(--purple); color:#fff; border-color:var(--purple);}
   .dz-tab b{margin-left:.35em; background:var(--yellow); color:var(--purple); border-radius:99px; padding:0 .45em; font-size:.85em;}
   .dz-note{margin:0; font-size:.85em; color:var(--ink-dim); font-weight:600; flex:none;}
   .dz-note.warn{color:var(--red);}
-
   .dz-tiles{flex:1 1 0; min-height:0; overflow:hidden; font-size:calc(var(--ts,1) * 1em); display:grid; grid-template-columns:repeat(auto-fill,minmax(6.6em,1fr)); gap:.65em; align-content:start; padding:.55em .55em .2em .15em;}
   .dz-tile{position:relative; border:1.5px solid var(--line); border-radius:.7em; background:var(--bg-2);}
   .dz-tile.sel{border-color:var(--yellow-dark); background:var(--yellow-soft); box-shadow:0 0 0 2px rgba(255,228,0,.45);}
@@ -339,16 +140,15 @@
   .dz-thumb img{max-width:100%; max-height:100%; display:block;}
   .dz-thumb.sm{width:2.7em; height:2.7em;}
   .dz-thumb.big{width:5.5em; height:5.5em;}
-
   .dz-rechead{display:flex; align-items:center; gap:.5em; flex:none; margin-bottom:.3em;}
   .dz-rechead h3{font-family:var(--display); font-weight:800; font-size:1.05em; color:var(--purple); text-transform:uppercase; letter-spacing:.05em; margin-right:auto;}
   .dz-rechead .pc-btn{font-size:.85em; padding:.45em .7em; min-height:2.4em;}
   .dz-layers{list-style:none; margin:0; padding:0; flex:1 1 0; min-height:0; overflow:hidden; font-size:calc(var(--rs,1) * 1em); display:grid; grid-template-columns:repeat(var(--lc,1),minmax(0,1fr)); column-gap:.9em; align-content:start;}
-  .dz-layers.c2{--lc:2} .dz-layers.c3{--lc:3}
-  .dz-layers.c2 .dz-thumb,.dz-layers.c3 .dz-thumb,.dz-layers.c2 .dz-ud,.dz-layers.c3 .dz-ud,.dz-layers.c2 [data-act="dz-reshuffle"],.dz-layers.c3 [data-act="dz-reshuffle"],.dz-layers.tight .dz-lname small{display:none;}
+  .dz-layers.c2{--lc:2}
+  .dz-layers.c2 .dz-thumb,.dz-layers.c2 .dz-ud,.dz-layers.c2 [data-act="dz-reshuffle"],.dz-layers.tight .dz-lname small{display:none;}
   .dz-layer{display:flex; align-items:center; gap:.55em; padding:.35em 0; border-bottom:1px solid var(--line);}
   .dz-lname{flex:1 1 0; min-width:0; font-weight:700; line-height:1.2; overflow-wrap:break-word; hyphens:auto;}
-  .dz-layers.c2 .dz-lname,.dz-layers.c3 .dz-lname{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .dz-layers.c2 .dz-lname{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .dz-lname small{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; font-size:.78em; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.04em;}
   .dz-step{flex:none; display:inline-flex; align-items:center; border:1.5px solid var(--line); border-radius:.5em; background:var(--bg); overflow:hidden;}
   .dz-step button{border:0; background:transparent; width:2.3em; height:2.5em; font-size:1.25em; cursor:pointer; line-height:1; padding:0; color:var(--purple); font-weight:700;}
@@ -362,15 +162,6 @@
   .dz-ud .dz-ibtn{height:1.25em; width:2em; font-size:.75em; border-radius:.4em;}
   .dz-layers button:disabled,.dz-layers input:disabled{opacity:.4; cursor:not-allowed;}
   .dz-empty{grid-column:1/-1; color:var(--ink-dim); padding:.6em 0; font-weight:600; font-size:.95em;}
-
-  .dz-confirmed{flex:1 1 0; justify-content:center; text-align:center; gap:.5em; padding:1.2em;}
-  .dz-confirmed h4{font-family:var(--display); font-size:1.4em; font-weight:800; color:var(--purple);}
-  .dz-confirmed p{font-size:.95em; color:var(--ink-dim); font-weight:500;}
-  .dz-confirmed .pizza-name{font-family:var(--display); font-size:1.2em; font-weight:800; color:var(--purple); background:var(--yellow); display:inline-block; padding:.2em .7em; border-radius:6px; align-self:center;}
-  .dz-tags{display:flex; flex-wrap:wrap; gap:.4em; justify-content:center; margin-top:.4em;}
-  .dz-tags span{background:var(--bg-2); padding:.3em .7em; border-radius:99px; font-size:.9em; color:var(--ink); font-weight:600; border:1px solid var(--line);}
-  .dz-tags b{font-family:var(--display); color:var(--purple); margin-right:.3em;}
-
   /* sheet + toast */
   .dz-sheet{position:fixed; inset:0; background:rgba(18,2,38,.55); display:grid; place-items:center; padding:16px; z-index:400;}
   .dz-sheet[hidden],.dz-toast[hidden]{display:none;}
@@ -382,7 +173,6 @@
   .dz-fld output,.dz-fld .unit{font-weight:700; font-size:12.5px; color:var(--ink); text-align:right;}
   .dz-fld input[type=number]{width:100%; min-width:0; background:var(--bg); border:1.5px solid var(--line); border-radius:8px; padding:6px 8px; font-weight:600;}
   .dz-toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(20px + env(safe-area-inset-bottom,0px)); background:var(--purple); color:#fff; padding:10px 16px; border-radius:10px; font-size:13px; font-weight:600; max-width:calc(100% - 32px); z-index:600; box-shadow:0 8px 24px rgba(18,2,38,.3);}
-
   @media (max-width:640px){
     html,body{overflow:auto;}
     .pc-root{height:auto; min-height:100%; overflow:visible;}
@@ -392,12 +182,7 @@
     .dz-side{flex-direction:column;}
     .dz-lib,.dz-rec{flex:none;}
     .dz-tiles,.dz-layers{flex:none; overflow:visible;}
-    .pc-cat-columns{grid-template-columns:1fr 1fr;}
   }
-  @media (prefers-reduced-motion:reduce){
-    .pc-pill.live .dot,.pc-bake-box,.pc-bake-overlay{animation:none;}
-  }
-
   /* ===================== iOS-STYLE LAYER: large rounded controls, gloss, soft depth ===================== */
   :root{
     --gloss: linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.14) 48%, rgba(255,255,255,0) 52%, rgba(0,0,0,.07) 100%);
@@ -409,7 +194,6 @@
   body{-webkit-font-smoothing:antialiased;}
   .pc-root{background:linear-gradient(180deg,#F3F0F8 0%,#E9E4F1 100%);}
   .pc-team-bg{background:transparent;}
-
   /* buttons */
   .pc-btn{
     min-height:46px; padding:12px 18px; border-radius:var(--r-btn); font-size:14.5px; font-weight:700;
@@ -419,45 +203,22 @@
   .pc-btn:hover{filter:brightness(1.05);}
   .pc-btn:active{transform:scale(.96); box-shadow:inset 0 2px 5px rgba(0,0,0,.22), 0 1px 1px rgba(29,5,61,.1); filter:brightness(.95);}
   .pc-btn.small{min-height:42px; padding:9px 15px; font-size:13.5px; border-radius:12px;}
-  .pc-btn.primary,.pc-btn.dark{background-color:#3A1470; background-image:var(--gloss),linear-gradient(180deg,#4A1C8C 0%,#1D053D 100%); color:#fff; text-shadow:0 -1px 0 rgba(0,0,0,.3);}
+  .pc-btn.primary{background-color:#3A1470; background-image:var(--gloss),linear-gradient(180deg,#4A1C8C 0%,#1D053D 100%); color:#fff; text-shadow:0 -1px 0 rgba(0,0,0,.3);}
   .pc-btn.gold{background-color:var(--yellow); background-image:var(--gloss),linear-gradient(180deg,#FFF06A 0%,#FFD600 100%); color:var(--purple);}
   .pc-btn.ghost{background-color:#fff; background-image:var(--gloss-soft); border:0; box-shadow:var(--lift-soft), inset 0 0 0 1.5px rgba(29,5,61,.18); color:var(--purple);}
-  .pc-btn.ghost-inv{background-color:rgba(255,255,255,.12); background-image:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,.04) 50%,rgba(255,255,255,0) 51%); border:0; box-shadow:inset 0 1px 0 rgba(255,255,255,.35), inset 0 0 0 1px rgba(255,255,255,.22), 0 2px 8px rgba(0,0,0,.25); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);}
   .pc-btn.armed{background-color:var(--red); background-image:var(--gloss),linear-gradient(180deg,#F2604F 0%,#C92A1D 100%); color:#fff;}
   .pc-btn:disabled{background-color:#E7E3ED; background-image:var(--gloss-soft); box-shadow:inset 0 0 0 1px var(--line); color:#A39AB3; text-shadow:none; filter:none; transform:none;}
-
-  /* top bar: glossy purple */
-  .pc-topbar{background-image:linear-gradient(180deg,#3B1571 0%,#1D053D 70%); box-shadow:inset 0 1px 0 rgba(255,255,255,.18);}
-
   /* panels and cards: soft rounded, gentle depth */
-  .pc-panel,.dz-box,.dz-stage,.pc-cat-col,.pc-recipe-footer{border-radius:24px; border:0; box-shadow:0 1px 2px rgba(29,5,61,.06), 0 10px 30px rgba(29,5,61,.08); background:rgba(255,255,255,.92);}
-  .pc-card{border-radius:20px; border:0; background:rgba(255,255,255,.75); box-shadow:0 1px 2px rgba(29,5,61,.05), 0 6px 18px rgba(29,5,61,.06);}
+  .dz-box,.dz-stage,.pc-recipe-footer{border-radius:24px; border:0; box-shadow:0 1px 2px rgba(29,5,61,.06), 0 10px 30px rgba(29,5,61,.08); background:rgba(255,255,255,.92);}
   .pc-recipe-footer{padding:10px 14px 10px 20px;}
-
-  /* team tiles on the monitor */
-  .pc-tile{border-radius:20px; border:0; border-left:0; background-color:#fff; background-image:var(--gloss-soft); box-shadow:var(--lift-soft), inset 5px 0 0 var(--line);}
-  .pc-tile:hover{transform:translateY(-2px); box-shadow:var(--lift-soft), inset 5px 0 0 var(--purple), 0 12px 26px rgba(29,5,61,.14);}
-  .pc-tile:active{transform:scale(.98);}
-  .pc-tile.t-live{background-color:var(--yellow-soft); background-image:linear-gradient(180deg,rgba(255,255,255,.8),rgba(255,255,255,.2) 50%,rgba(255,255,255,0) 51%); box-shadow:var(--lift-soft), inset 5px 0 0 var(--yellow-dark);}
-  .pc-tile.t-done{background-color:var(--purple-soft); background-image:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.15) 50%,rgba(255,255,255,0) 51%); box-shadow:var(--lift-soft), inset 5px 0 0 var(--purple);}
-  .pc-tile.t-over{box-shadow:var(--lift-soft), inset 5px 0 0 var(--ink-dim);}
-
-  /* round badges + phase pills */
-  .pc-turno-badge{border-radius:12px; border:0; padding:9px 6px; background-color:#fff; background-image:var(--gloss-soft); box-shadow:var(--lift-soft), inset 0 0 0 1px var(--line);}
-  .pc-turno-badge.active{background-color:var(--yellow); background-image:var(--gloss),linear-gradient(180deg,#FFF06A,#FFD600); box-shadow:var(--lift);}
-  .pc-phase-pill{border-radius:10px; background-image:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 55%);}
-  .pc-pill{padding:4px 10px; background-image:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 55%); box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 1px 2px rgba(29,5,61,.12);}
-
   /* inputs: iOS fields */
-  .pc-name-input,.pc-minutes-input,.pc-rules-textarea,.dz-fld input[type=number]{border-radius:12px; border:0; background:#fff; box-shadow:inset 0 0 0 1px var(--line), inset 0 2px 3px rgba(29,5,61,.05); min-height:42px;}
-  .pc-name-input:focus,.pc-minutes-input:focus,.pc-rules-textarea:focus{box-shadow:inset 0 0 0 2px #7B4FD0, 0 0 0 4px rgba(123,79,208,.15);}
-
+  .pc-name-input,.dz-fld input[type=number]{border-radius:12px; border:0; background:#fff; box-shadow:inset 0 0 0 1px var(--line), inset 0 2px 3px rgba(29,5,61,.05); min-height:42px;}
+  .pc-name-input:focus{box-shadow:inset 0 0 0 2px #7B4FD0, 0 0 0 4px rgba(123,79,208,.15);}
   /* designer: segmented tabs */
   .dz-tabs{background:rgba(118,118,128,.12); border-radius:14px; padding:3px; gap:2px; margin-top:.4em;}
   .dz-tab{flex:1 1 auto; border:0; background:transparent; border-radius:11px; min-height:2.9em; padding:.35em .8em; color:var(--purple);}
   .dz-tab[aria-selected="true"]{background-color:#fff; background-image:var(--gloss-soft); color:var(--purple); box-shadow:0 1px 1px rgba(0,0,0,.06), 0 3px 8px rgba(29,5,61,.14);}
   .dz-tab b{background-image:var(--gloss),linear-gradient(180deg,#FFF06A,#FFD600);}
-
   /* designer: ingredient tiles like app icons */
   .dz-tile{border:0; border-radius:1.1em; background-color:#fff; background-image:var(--gloss-soft); box-shadow:var(--lift-soft), inset 0 0 0 1px rgba(29,5,61,.06);}
   .dz-tile.on{box-shadow:var(--lift-soft), inset 0 0 0 2px var(--purple);}
@@ -466,7 +227,6 @@
   .dz-tbtn:active{transform:scale(.94); background:transparent;}
   .dz-thumb img{filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));}
   .dz-badge{background-image:var(--gloss),linear-gradient(180deg,#4A1C8C,#1D053D); box-shadow:0 0 0 2px #fff, 0 2px 6px rgba(29,5,61,.3);}
-
   /* designer: stepper + icon buttons */
   .dz-step{border:0; border-radius:.9em; background-color:#fff; background-image:var(--gloss-soft); box-shadow:var(--lift-soft), inset 0 0 0 1px var(--line);}
   .dz-step button{width:2.6em; height:2.8em;}
@@ -477,115 +237,31 @@
   .dz-ibtn.rm{color:var(--red);}
   .dz-ud .dz-ibtn{height:1.35em; width:2.2em; border-radius:.5em;}
   .dz-rechead .pc-btn{min-height:2.7em; font-size:.85em; padding:.4em .9em; border-radius:12px;}
-
   /* sheets, toast, chips */
   .dz-sheet{-webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);}
   .dz-sheet-panel{border-radius:24px;}
   .dz-toast{border-radius:16px; background:rgba(29,5,61,.88); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); padding:12px 18px;}
-  .pc-ing-chip{border:0; background-color:#fff; background-image:var(--gloss-soft); box-shadow:var(--lift-soft), inset 0 0 0 1px var(--line); padding:8px 8px 8px 14px;}
-  .pc-ing-chip button{width:26px; height:26px;}
-  .pc-ing-row{border:0; border-radius:14px; background:#fff; box-shadow:var(--lift-soft);}
-  .pc-backlink{font-size:13.5px; color:#6B3FC4; font-weight:700; min-height:40px;}
-  .pc-backlink:hover{color:var(--purple);}
-  .pc-timer-controls{gap:10px;}
-  .pc-timer-controls .row{gap:10px;}
-  .pc-timer-controls .pc-btn.small{min-height:46px; font-size:14px;}
-
-
-  .pc-tile-foot{display:flex; align-items:flex-end; justify-content:space-between; gap:8px; min-height:0;}
-  .pc-tile-foot .pc-tile-pizza{flex:1; min-width:0;}
-  .pc-tile-thumb{flex:none; height:auto; width:clamp(56px,40%,130px); max-height:none; aspect-ratio:1; filter:drop-shadow(0 3px 5px rgba(29,5,61,.25));}
-  .pc-tile{align-items:stretch;}
   .dz-tabs{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); row-gap:4px;}
   .dz-tab{position:relative; flex:1 1 0; min-width:0; white-space:nowrap; overflow:visible; padding:.35em .25em; font-size:.88em;}
   .dz-tab b{position:absolute; top:-.45em; right:-.2em; margin:0; min-width:1.6em; line-height:1.6em; padding:0 .35em; border-radius:99px; box-shadow:0 1px 3px rgba(29,5,61,.25); z-index:1;}
-  @media (prefers-reduced-motion:reduce){ .pc-btn,.dz-tbtn,.pc-tile{transition:none;} }
-
+  @media (prefers-reduced-motion:reduce){ .pc-btn,.dz-tbtn{transition:none;} }
   /* ===================== MOTION + HERO LAYER (aubergine & yellow) ===================== */
   :root{
     --aub-900:#12021F; --aub-800:#1D053D; --aub-700:#2E0B57; --aub-600:#44167E; --aub-500:#6A2FB0; --aub-300:#B597E0;
     --sun-300:#FFF3A0; --sun-400:#FFE45C; --sun-500:#FFD60A; --sun-600:#F5B82E;
     --spring: cubic-bezier(.32,1.28,.54,1);
   }
-
   /* ambient aurora behind everything */
   .pc-root{background:#EEEAF5; isolation:isolate; overflow:clip;}
-  #pc-app,.pc-team-bg,.pc-dash-grid{overflow-x:clip;}
+  #pc-app,.pc-team-bg{overflow-x:clip;}
   .pc-root::before,.pc-root::after{content:""; position:fixed; z-index:-1; pointer-events:none; border-radius:50%; filter:blur(70px); opacity:.55; will-change:transform;}
   .pc-root::before{width:60vmax; height:60vmax; left:-18vmax; top:-22vmax; background:radial-gradient(circle, rgba(255,214,10,.55), rgba(255,214,10,0) 65%); animation:auroraA 26s ease-in-out infinite alternate;}
   .pc-root::after{width:70vmax; height:70vmax; right:-25vmax; bottom:-30vmax; background:radial-gradient(circle, rgba(106,47,176,.45), rgba(106,47,176,0) 65%); animation:auroraB 32s ease-in-out infinite alternate;}
   @keyframes auroraA{to{transform:translate(18vmax,14vmax) scale(1.15);}}
   @keyframes auroraB{to{transform:translate(-16vmax,-12vmax) scale(1.1);}}
-  .pc-panel,.dz-box,.dz-stage,.pc-cat-col,.pc-recipe-footer{background:rgba(255,255,255,.82);}
-
-  /* view transitions (iOS push) */
-  #pc-app.vin-fwd{animation:viewFwd .55s var(--spring) both;}
-  #pc-app.vin-back{animation:viewBack .5s var(--spring) both;}
-  @keyframes viewFwd{from{opacity:0; transform:translateX(34px) scale(.985);}to{opacity:1; transform:none;}}
-  @keyframes viewBack{from{opacity:0; transform:translateX(-34px) scale(.985);}to{opacity:1; transform:none;}}
-
-  /* top bar */
-  .pc-topbar{background-image:linear-gradient(115deg,var(--aub-900) 0%,var(--aub-700) 55%,var(--aub-600) 100%);}
-  .pc-brand-mark{box-shadow:0 0 0 0 rgba(255,228,0,.7); animation:beacon 2.4s ease-out infinite;}
-  @keyframes beacon{0%{box-shadow:0 0 0 0 rgba(255,228,0,.65);}70%{box-shadow:0 0 0 12px rgba(255,228,0,0);}100%{box-shadow:0 0 0 0 rgba(255,228,0,0);}}
-  .pc-brand{letter-spacing:-.02em; font-size:23px;}
-
-  /* ---- hero timer panel: dark aubergine glass with a watch-style dial ---- */
-  .pc-panel-timer{
-    background:radial-gradient(120% 90% at 30% 0%, var(--aub-600) 0%, var(--aub-800) 55%, var(--aub-900) 100%) !important;
-    color:#fff; box-shadow:0 20px 50px rgba(29,5,61,.35), inset 0 1px 0 rgba(255,255,255,.12) !important;
-    gap:10px;
-  }
-  .pc-panel-timer .pc-panel-title{color:var(--sun-400);}
-  .pc-panel-timer .pc-panel-title span{color:var(--aub-300);}
-  .pc-panel-timer .pc-turno-badge{background:rgba(255,255,255,.08); background-image:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 55%); color:#D9CCF0; box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);}
-  .pc-panel-timer .pc-turno-badge.active{color:var(--aub-800); background-color:var(--sun-500); background-image:var(--gloss),linear-gradient(180deg,var(--sun-400),var(--sun-600)); box-shadow:0 6px 18px rgba(255,214,10,.35), inset 0 1px 0 rgba(255,255,255,.6);}
-
-  .pc-dial{position:relative; width:min(100%, 44vh, 330px); aspect-ratio:1; margin:2px auto 0; flex-shrink:1; min-height:0;}
-  .pc-dial svg{position:absolute; inset:0; width:100%; height:100%; overflow:visible;}
-  .dial-face{fill:url(#dialFace);}
-  .dial-tick{stroke:rgba(255,255,255,.18); stroke-width:1.2; stroke-linecap:round;}
-  .dial-tick.major{stroke:rgba(255,255,255,.45); stroke-width:2;}
-  .dial-track{fill:none; stroke:rgba(255,255,255,.08); stroke-width:13;}
-  .dial-arc{fill:none; stroke:url(#dialArc); stroke-width:13; stroke-linecap:round; transition:stroke-dashoffset 1s linear; filter:drop-shadow(0 0 6px rgba(255,214,10,.55));}
-  .dial-knob{transform-box:view-box; transform-origin:110px 110px; transition:transform 1s linear;}
-  .dial-knob circle{fill:#fff; stroke:var(--sun-500); stroke-width:3; filter:drop-shadow(0 0 6px rgba(255,228,0,.9));}
-  .dial-phase{fill:none; stroke:rgba(255,255,255,.12); stroke-width:5; stroke-linecap:round; transition:stroke .5s ease;}
-  .dial-phase.reached{stroke:var(--sun-600);}
-  .dial-phase.active{stroke:var(--sun-400); animation:phaseGlow 1.6s ease-in-out infinite;}
-  @keyframes phaseGlow{50%{stroke:#fff; filter:drop-shadow(0 0 5px rgba(255,228,0,.9));}}
-  .dial-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none;}
-  .dial-round{font-size:10.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--aub-300);}
-  .dial-time{font-family:var(--display); font-weight:900; font-size:clamp(34px,6.2vh,56px); line-height:1.02; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:-.02em; text-shadow:0 2px 18px rgba(255,214,10,.25);}
-  .dial-label{font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--sun-400); margin-top:2px;}
-  .pc-dial.running .dial-colon{animation:colon 1s steps(1) infinite;}
-  @keyframes colon{50%{opacity:.25;}}
-  .pc-dial.hurry .dial-arc{stroke:url(#dialHurry); filter:drop-shadow(0 0 8px rgba(255,90,60,.8));}
-  .pc-dial.hurry .dial-time{animation:hurry 1s ease-in-out infinite;}
-  @keyframes hurry{50%{color:#FFB4A8; transform:scale(1.04);}}
-  .pc-dial.done{animation:ring .45s ease-in-out 4;}
-  .pc-dial.done .dial-time{color:#FF8A7A;}
-
-  .pc-panel-timer .pc-phase-pills{gap:5px;}
-  .pc-panel-timer .pc-phase-pill{border-radius:10px; font-size:9px; padding:6px 2px; background:rgba(255,255,255,.07) !important; color:#BBA8DA !important; box-shadow:inset 0 0 0 1px rgba(255,255,255,.1) !important;}
-  .pc-panel-timer .pc-phase-pill.reached{background:rgba(255,214,10,.16) !important; color:var(--sun-300) !important;}
-  .pc-panel-timer .pc-phase-pill.active{background:var(--sun-500) !important; background-image:var(--gloss) !important; color:var(--aub-800) !important; box-shadow:0 4px 14px rgba(255,214,10,.4) !important; transform:translateY(-1px);}
-  .pc-panel-timer .pc-btn.dark{background-color:var(--sun-500); background-image:var(--gloss),linear-gradient(180deg,var(--sun-400),var(--sun-600)); color:var(--aub-800); text-shadow:none; box-shadow:0 6px 16px rgba(255,214,10,.25), inset 0 1px 0 rgba(255,255,255,.6);}
-  .pc-panel-timer .pc-btn.dark.current{background-image:var(--gloss),linear-gradient(180deg,#fff,#EDE3FF); color:var(--aub-800);}
-  .pc-panel-timer .pc-btn.ghost{background-color:rgba(255,255,255,.08); background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 55%); color:#fff; box-shadow:inset 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 0 rgba(255,255,255,.2);}
-  .pc-panel-timer .pc-btn:disabled{background:rgba(255,255,255,.05); color:rgba(255,255,255,.35); box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);}
-
-  /* staggered entrances */
-  .pc-team-grid:not(.settled) .pc-tile{animation:tileIn .6s var(--spring) both; animation-delay:calc(var(--i,0) * 55ms + 80ms);}
+  .dz-box,.dz-stage,.pc-recipe-footer{background:rgba(255,255,255,.82);}
   @keyframes tileIn{from{opacity:0; transform:translateY(18px) scale(.94);}to{opacity:1; transform:none;}}
   .dz-tiles.enter .dz-tile{animation:tileIn .5s var(--spring) both; animation-delay:calc(var(--i,0) * 30ms);}
-  .pc-cat-columns > *{animation:tileIn .55s var(--spring) both;}
-  .pc-cat-columns > :nth-child(2){animation-delay:.05s} .pc-cat-columns > :nth-child(3){animation-delay:.1s} .pc-cat-columns > :nth-child(4){animation-delay:.15s} .pc-cat-columns > :nth-child(5){animation-delay:.2s} .pc-cat-columns > :nth-child(6){animation-delay:.25s}
-  .pc-tile.t-live .pc-tile-name{background:linear-gradient(90deg,var(--aub-800) 0%,var(--aub-500) 40%,var(--aub-800) 80%); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:sheen 3.5s linear infinite;}
-  @keyframes sheen{to{background-position:-200% 0;}}
-  .pc-tile-thumb{animation:spinIn .8s var(--spring) both;}
-  @keyframes spinIn{from{transform:rotate(-120deg) scale(.4); opacity:0;}to{transform:none; opacity:1;}}
-
   /* designer micro-interactions */
   .dz-tile.pop .dz-badge{animation:pop .45s var(--spring);}
   .dz-tile.pop{animation:bump .4s var(--spring);}
@@ -599,31 +275,6 @@
   @keyframes plate{35%{transform:scale(.985);}100%{transform:none;}}
   .pc-footer-count{display:inline-block;}
   .pc-footer-count.bump{animation:pop .4s var(--spring);}
-
-  /* confirmed state */
-  .dz-confirmed{animation:tileIn .6s var(--spring) both;}
-  .dz-check{width:64px; height:64px; margin:0 auto;}
-  .dz-check circle{fill:var(--sun-500); transform-origin:center; animation:pop .5s var(--spring) both;}
-  .dz-check path{fill:none; stroke:var(--aub-800); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:40; stroke-dashoffset:40; animation:draw .45s .35s ease-out forwards;}
-  @keyframes draw{to{stroke-dashoffset:0;}}
-  .dz-stage.celebrate canvas{animation:celebrate 1.2s var(--spring);}
-  @keyframes celebrate{0%{transform:scale(.9) rotate(-8deg);}60%{transform:scale(1.03) rotate(2deg);}100%{transform:none;}}
-  #pc-confetti{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:650;}
-
-  /* BAKE IT / FINISH: rays behind the message */
-  .pc-bake-overlay{background:radial-gradient(circle at 50% 45%, rgba(68,22,126,.96), rgba(18,2,31,.97) 70%); overflow:hidden;}
-  .pc-bake-overlay::before{content:""; position:absolute; left:50%; top:45%; width:180vmax; height:180vmax; margin:-90vmax 0 0 -90vmax;
-    background:repeating-conic-gradient(rgba(255,214,10,.13) 0deg 8deg, rgba(255,214,10,0) 8deg 20deg); animation:rays 18s linear infinite;
-    -webkit-mask:radial-gradient(circle, #000 0%, transparent 55%); mask:radial-gradient(circle, #000 0%, transparent 55%);}
-  .pc-bake-overlay.finish::before{background:repeating-conic-gradient(rgba(255,110,90,.16) 0deg 8deg, rgba(255,110,90,0) 8deg 20deg);}
-  @keyframes rays{to{transform:rotate(360deg);}}
-  .pc-bake-box{position:relative;}
-  .pc-bake-emoji{font-size:72px; animation:float 2.4s ease-in-out infinite;}
-  @keyframes float{50%{transform:translateY(-10px) rotate(-4deg);}}
-  .pc-bake-text{font-size:clamp(56px,11vw,120px); background:linear-gradient(180deg,#FFF6B0,var(--sun-500) 55%,var(--sun-600)); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 6px 30px rgba(255,214,10,.45));}
-  .pc-bake-overlay.finish .pc-bake-text{background:linear-gradient(180deg,#FFD2CA,#FF6A55 60%,#E13C2E); -webkit-background-clip:text; background-clip:text; filter:drop-shadow(0 6px 30px rgba(255,90,60,.5));}
-  .pc-bake-sub{font-size:18px;}
-
   /* sheet + toast springs */
   .dz-sheet:not([hidden]){animation:fadeIn .25s ease both;}
   .dz-sheet:not([hidden]) .dz-sheet-panel{animation:sheetUp .5s var(--spring) both;}
@@ -631,55 +282,10 @@
   @keyframes sheetUp{from{transform:translateY(40px) scale(.96); opacity:0;}to{transform:none; opacity:1;}}
   .dz-toast:not([hidden]){animation:toastIn .45s var(--spring) both;}
   @keyframes toastIn{from{transform:translate(-50%,24px) scale(.9); opacity:0;}to{transform:translate(-50%,0); opacity:1;}}
-
-  /* ===================== RULES PAGE: step cards ===================== */
-  .rl-wrap{flex:1; min-height:0; display:flex; flex-direction:column; gap:14px;}
-  .rl-phases{flex:none; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; padding:12px 14px; border-radius:22px; color:#fff;
-    background:radial-gradient(120% 140% at 20% 0%, var(--aub-600) 0%, var(--aub-800) 60%, var(--aub-900) 100%); box-shadow:0 14px 34px rgba(29,5,61,.28), inset 0 1px 0 rgba(255,255,255,.12);}
-  .rl-phase{position:relative; padding:8px 12px 8px 14px; border-radius:14px; background:rgba(255,255,255,.07); box-shadow:inset 0 0 0 1px rgba(255,255,255,.1); min-width:0;}
-  .rl-phase::before{content:""; position:absolute; left:0; top:10px; bottom:10px; width:4px; border-radius:4px; background:var(--sun-500);}
-  .rl-phase b{display:block; font-family:var(--display); font-weight:900; font-size:clamp(14px,1.6vw,19px); line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .rl-phase span{display:block; font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--sun-400); margin-top:3px; font-variant-numeric:tabular-nums;}
-  .rl-phase-label{grid-column:1/-1; font-size:10.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--aub-300); margin-bottom:2px;}
-  .rl-grid{flex:1; min-height:0; display:grid; gap:14px; grid-template-columns:repeat(var(--c),minmax(0,1fr)); grid-template-rows:repeat(var(--r),minmax(0,1fr));}
-  .rl-card{position:relative; min-height:0; overflow:hidden; border-radius:24px; padding:clamp(14px,1.8vw,22px); display:flex; flex-direction:column; gap:8px;
-    background-color:#fff; background-image:var(--gloss-soft); box-shadow:var(--lift-soft), 0 10px 26px rgba(29,5,61,.08); animation:tileIn .6s var(--spring) both; animation-delay:calc(var(--i,0) * 60ms + 60ms);}
-  .rl-card::after{content:""; position:absolute; right:-30px; bottom:-30px; width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, rgba(255,214,10,.22), rgba(255,214,10,0) 70%); pointer-events:none;}
-  .rl-top{display:flex; align-items:center; justify-content:space-between; gap:10px; flex:none;}
-  .rl-num{width:clamp(40px,4.2vw,56px); aspect-ratio:1; border-radius:50%; display:grid; place-items:center; font-family:var(--display); font-weight:900; font-size:clamp(20px,2.3vw,30px); color:var(--aub-800);
-    background-color:var(--sun-500); background-image:var(--gloss),linear-gradient(180deg,var(--sun-400),var(--sun-600)); box-shadow:0 6px 16px rgba(255,214,10,.35), inset 0 1px 0 rgba(255,255,255,.6);}
-  .rl-icon{font-size:clamp(30px,3.6vw,50px); line-height:1; filter:drop-shadow(0 3px 4px rgba(29,5,61,.18));}
-  .rl-text{font-family:var(--display); font-weight:800; font-size:clamp(15px,1.2vw + 1.1vmin,26px); line-height:1.2; color:var(--purple); letter-spacing:-.01em; overflow-wrap:break-word; hyphens:auto; margin-top:auto;}
-  .rl-card:nth-child(odd) .rl-num{background-image:var(--gloss),linear-gradient(180deg,#4A1C8C,#1D053D); color:var(--sun-400); box-shadow:0 6px 16px rgba(29,5,61,.3), inset 0 1px 0 rgba(255,255,255,.25);}
-  .rl-empty{flex:1; display:grid; place-items:center; text-align:center; color:var(--ink-dim); font-weight:600; font-size:18px; line-height:1.6;}
-  .rl-empty > div > div{font-size:56px; margin-bottom:8px;}
-  @media (orientation:portrait){
-    .rl-grid{grid-template-columns:repeat(var(--pc),minmax(0,1fr)); grid-template-rows:repeat(var(--pr),minmax(0,1fr));}
-    .rl-card{flex-direction:row; align-items:center; gap:clamp(12px,2vw,20px);}
-    .rl-top{flex-direction:column; gap:8px;}
-    .rl-text{margin-top:0; flex:1; min-width:0;}
-  }
-  @media (max-width:640px){
-    .rl-scroll{overflow:visible; flex:none;}
-    .rl-wrap,.rl-grid{flex:none;}
-    .rl-phases{grid-template-columns:1fr 1fr;}
-    .rl-grid{grid-template-columns:1fr; grid-template-rows:none;}
-    .rl-card{min-height:0;}
-  }
-
-  /* spices: text-only tiles and rows */
-  .dz-tile.noart .dz-tbtn{min-height:6.2em; justify-content:center; gap:.4em; padding:.8em .4em;}
-  .dz-tile.noart .dz-tn{font-size:1em; min-height:0;}
-  .dz-spice-state{font-size:.75em; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim);}
-  .dz-tile.noart.sel .dz-spice-state{color:var(--purple);}
-  .dz-spice-row .dz-lname{padding-left:.3em;}
-  .dz-tags span.spice{background:var(--yellow-soft); border-color:var(--yellow-dark);}
-  .pc-ing-row.noart{padding-left:14px;}
   .dz-lname{min-width:6.5em;}
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
   }
-
   /* ===================== CAKE DESIGNER ADDITIONS ===================== */
   .dz-tiles{--ts:1; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin;}
   .dz-group{grid-column:1/-1; font-size:.72em; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim); padding:.6em 0 .25em; border-bottom:1px solid var(--line); margin-bottom:.1em;}
@@ -697,12 +303,6 @@
   .dz-step small{display:none;}
   .dz-roles{display:flex; flex-wrap:wrap; gap:8px;}
   .dz-roles .pc-btn{flex:1 1 auto;}
-  .dz-tags span.coat{background:var(--purple-soft); border-color:var(--purple);}
-  .dz-tags span.deco{background:var(--yellow-soft); border-color:var(--yellow-dark);}
-  .pc-ing-rows{overflow-y:auto; scrollbar-width:thin;}
-  .pc-ing-row{flex:none; height:46px;}
-  .pc-cat-col-group{font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim); margin:6px 0 1px;}
-  .pc-cat-col-group:first-child{margin-top:0;}
 </style>
 </head>
 <body>
@@ -722,29 +322,6 @@
 <script>
 (function(){
   'use strict';
-  // ===================== IMPOSTAZIONI GARA (modificabili in Impostazioni) =====================
-  const GAME = { participants:30, rounds:2, teamsPerRound:3, maxLayers:8, maxDecos:5, alertMinutes:15 };
-  const LIMITS = { participants:[1,500], rounds:[1,8], teamsPerRound:[1,8], maxLayers:[1,20], maxDecos:[1,20], alertMinutes:[0,120], minutes:[1,240] };
-  const ROUND_LETTERS = "ABCDEFGH";
-  let TEAM_IDS = [];
-  function buildTeamIds(){
-    TEAM_IDS = [];
-    for(let r=0;r<GAME.rounds;r++) for(let k=1;k<=GAME.teamsPerRound;k++) TEAM_IDS.push(ROUND_LETTERS[r]+k);
-  }
-  buildTeamIds();
-  let TURNO_MINUTES = 60;
-  let RULES_TEXT = [
-    "1. Scegli impasti, farciture, copertura e decorazioni",
-    "2. Dai un nome alla tua torta",
-    "3. Progetta e disegna la torta strato per strato",
-    "4. Prepara gli ingredienti e organizza la postazione",
-    "5. Prepara e cuoci le basi",
-    "6. Farcisci e monta gli strati",
-    "7. Copri e decora la torta secondo il progetto",
-    "8. Presenta la torta alla giuria e scatta una foto di squadra"
-  ].join("\n");
-  const turnoSeconds = () => TURNO_MINUTES*60;
-
   const $ = s => document.querySelector(s);
   const HTML_ESC = {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"};
   const escapeHtml = s => String(s==null?"":s).replace(/[&<>"']/g, c => HTML_ESC[c]);
@@ -1127,479 +704,140 @@
     return thumbCache.get(key);
   }
   const thumbImg = id => `<img src="${thumbSrc(id)}" alt="">`;
-  const cakeThumbCache = new Map();
-  function cakeThumb(teamId){
-    const r=teams[teamId].recipe, key=JSON.stringify(r)+"|"+itemsVersion;
-    const hit=cakeThumbCache.get(teamId); if(hit&&hit.key===key) return hit.url;
-    const c=document.createElement("canvas"); c.width=c.height=260; drawCake(c.getContext("2d"),260,r);
-    const url=c.toDataURL("image/png"); cakeThumbCache.set(teamId,{key,url}); return url;
-  }
 
   // ===================== STATO =====================
+  const MAX_LAYERS = 12, MAX_DECOS = 8;
   const emptyRecipe = () => ({shape:"round", tiers:1, layers:[], coat:null, decos:[]});
-  function defaultTeam(){ return { name:"", cakeName:"", status:"attesa", recipe:emptyRecipe() }; }
-  let teams = {};
-  function ensureTeams(){ TEAM_IDS.forEach(id => { if(!teams[id]) teams[id] = defaultTeam(); }); }
-  ensureTeams();
-  let timer = { currentTurno:0, startedAt:null, running:false, duration:turnoSeconds(), total:turnoSeconds() };
-  let alarmPlayed = {}, alertShown = {};
-  let view = "organizer", selectedTeam = null, activeCat = "impasti", sheetIng = null, lastTeamStatus = null;
-
+  const cake = { name:"", recipe:emptyRecipe() };
+  let activeCat = "impasti", sheetIng = null;
   const root = document.getElementById("pc-app");
-  const teamGroup = id => id[0];
-  const defaultName = id => "Squadra " + (TEAM_IDS.indexOf(id) + 1);
-  const teamName = id => teams[id].name || defaultName(id);
-  const teamTurno = id => ROUND_LETTERS.indexOf(teamGroup(id)) + 1;
-  const perTeam = () => GAME.participants / Math.max(1, TEAM_IDS.length);
-  const perTeamText = () => { const lo=Math.floor(perTeam()), hi=Math.ceil(perTeam()); return lo===hi ? `${lo}` : `${lo}–${hi}`; };
 
   function recipeStats(r){
     const ls=r.layers.filter(l=>ITEM[l.ingId]), ds=r.decos.filter(d=>ITEM[d.ingId]);
     return { layers:ls.length, bases:ls.filter(l=>BASE_KINDS.has(kindFor(ITEM[l.ingId],"layer"))).length, decoTypes:ds.length,
-      pieces:ds.reduce((a,d)=>a+d.count,0), hasCoat:!!(r.coat&&ITEM[r.coat]), overL:ls.length>GAME.maxLayers, overD:ds.length>GAME.maxDecos };
+      pieces:ds.reduce((a,d)=>a+d.count,0), hasCoat:!!(r.coat&&ITEM[r.coat]) };
   }
   const tierFactor = r => [1,.49,.23].slice(0,r.tiers||1).reduce((a,b)=>a+b,0);
-
-  // ===================== TIMER + FASI =====================
-  const PHASES = ["Progetto", "Basi e cottura", "Farcitura e montaggio", "Decorazione e foto"];
-  function fmtTime(sec){ sec=Math.max(0,Math.round(sec)); return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0"); }
-  function remainingSeconds(){ if(!timer.running||!timer.startedAt) return timer.duration; return Math.max(0, timer.duration-(Date.now()-timer.startedAt)/1000); }
-  function currentPhaseIndex(){
-    if(!timer.currentTurno || timer.total<=0) return -1;
-    const elapsed=Math.max(0,timer.total-remainingSeconds());
-    return Math.max(0,Math.min(3,Math.floor(elapsed/(timer.total/4))));
-  }
-  function timeUp(){ return timer.currentTurno>0 && remainingSeconds()<=0; }
-  function statusFor(teamId){
-    if(teams[teamId].status==="completata") return "completata";
-    const my=teamTurno(teamId);
-    if(timer.currentTurno===0) return "attesa";
-    if(timer.currentTurno!==my) return timer.currentTurno>my ? "terminato" : "attesa";
-    return timeUp() ? "terminato" : "in_corso";
-  }
-  function statusPill(status){
-    const map={ attesa:["wait","In attesa"], in_corso:["live","In gara"], completata:["done","Confermata"], terminato:["over","Scaduto"] };
-    const [cls,label]=map[status]||map.attesa;
-    return `<span class="pc-pill ${cls}"><span class="dot"></span>${label}</span>`;
-  }
-  function orgStartTurno(n){ alarmPlayed[n]=false; alertShown[n]=false; timer={ currentTurno:n, startedAt:Date.now(), running:true, duration:turnoSeconds(), total:turnoSeconds() }; render(); }
-  function orgTogglePause(){
-    if(!timer.currentTurno || timer.duration<=0) return;
-    if(timer.running){ timer.duration=remainingSeconds(); timer.running=false; timer.startedAt=null; }
-    else { timer.running=true; timer.startedAt=Date.now(); }
-    render();
-  }
-  function orgResetTurno(){ timer={ currentTurno:0, startedAt:null, running:false, duration:turnoSeconds(), total:turnoSeconds() }; alarmPlayed={}; alertShown={}; render(); }
-
-  // ===================== AUDIO =====================
-  let audioCtx=null;
-  function audio(){ try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==="suspended") audioCtx.resume(); return audioCtx; }catch(e){ return null; } }
-  document.addEventListener("pointerdown", () => audio(), {once:true});
-  function beep(freq,start,dur,type,vol){
-    const ctx=audio(); if(!ctx) return;
-    const o=ctx.createOscillator(), g=ctx.createGain(), t0=ctx.currentTime+start;
-    o.type=type; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(vol,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
-    o.start(t0); o.stop(t0+dur+0.05);
-  }
-  function playAlarm(){ beep(880,0,.18,"square",.35); beep(880,.26,.18,"square",.35); beep(880,.52,.45,"square",.35); }
-  function showOverlay(emoji,text,sub,finish){
-    const overlay=document.createElement("div");
-    overlay.className="pc-bake-overlay"+(finish?" finish":"");
-    overlay.innerHTML=`<div class="pc-bake-box"><div class="pc-bake-emoji">${emoji}</div><div class="pc-bake-text">${text}</div><div class="pc-bake-sub">${sub}</div><div class="pc-bake-hint">tocca per chiudere</div></div>`;
-    overlay.onclick=()=>overlay.remove(); document.body.appendChild(overlay); setTimeout(()=>overlay.remove(),6000);
-  }
-  function showAlertPopup(){ beep(660,0,.5,"sine",.3); showOverlay("🎂✨","DECORA!",`Mancano ${GAME.alertMinutes} minuti: è ora di coprire e decorare!`); }
-  function showFinishPopup(){ playAlarm(); showOverlay("⏰🏁","FINE!","Tempo scaduto: mani giù e portate la torta in giuria!",true); }
+  const cakeTitle = () => (cake.name||"").trim() || "Nuova torta";
 
   let toastT=0;
   function toast(msg){ const t=$("#dz-toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,3200); }
 
-  // ===================== RENDER =====================
-  let lastView="organizer";
-  function render(){
-    closeSheet(true);
-    if(view!==lastView){ root.classList.remove("vin-fwd","vin-back"); void root.offsetWidth; root.classList.add(view==="organizer"?"vin-back":"vin-fwd"); lastView=view; }
-    if(view==="organizer") return renderOrganizer();
-    if(view==="team") return renderTeam();
-    if(view==="settings") return renderSettings();
-    if(view==="ingredients") return renderIngredientsCatalog();
-    if(view==="rules") return renderRules();
-  }
-  const waveSvg = fill => `<svg class="pc-wave" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0,18 C150,38 300,0 450,16 C600,32 750,2 900,16 C1020,26 1110,10 1200,18 L1200,40 L0,40 Z" style="fill:${fill}"></path></svg>`;
-  const backLink = (label="← torna al monitor") => `<button class="pc-backlink" data-act="back">${label}</button>`;
-
-  // ===================== MONITOR ORGANIZZATORE =====================
-  const DIAL_R=80, DIAL_C=2*Math.PI*DIAL_R;
-  function polar(r,deg){ const a=(deg-90)*Math.PI/180; return [110+r*Math.cos(a),110+r*Math.sin(a)]; }
-  function arcPath(r,a0,a1){ const [x0,y0]=polar(r,a0),[x1,y1]=polar(r,a1); return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${a1-a0>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`; }
-  function dialSvg(){
-    let ticks="";
-    for(let i=0;i<60;i++){ const maj=i%5===0, [x0,y0]=polar(maj?64:67,i*6), [x1,y1]=polar(71,i*6);
-      ticks+=`<line class="dial-tick${maj?" major":""}" x1="${x0.toFixed(2)}" y1="${y0.toFixed(2)}" x2="${x1.toFixed(2)}" y2="${y1.toFixed(2)}"/>`; }
-    const phases=[0,1,2,3].map(i=>`<path class="dial-phase" data-ph="${i}" d="${arcPath(101,i*90+4,(i+1)*90-4)}"/>`).join("");
-    return `<svg viewBox="0 0 220 220" aria-hidden="true">
-      <defs>
-        <radialGradient id="dialFace" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#3B1571"/><stop offset=".7" stop-color="#1D053D"/><stop offset="1" stop-color="#12021F"/></radialGradient>
-        <linearGradient id="dialArc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF3A0"/><stop offset=".5" stop-color="#FFD60A"/><stop offset="1" stop-color="#F5B82E"/></linearGradient>
-        <linearGradient id="dialHurry" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFD0C8"/><stop offset=".5" stop-color="#FF6A55"/><stop offset="1" stop-color="#E13C2E"/></linearGradient>
-      </defs>
-      ${phases}
-      <circle class="dial-face" cx="110" cy="110" r="94"/>
-      <circle cx="110" cy="110" r="94" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
-      ${ticks}
-      <circle class="dial-track" cx="110" cy="110" r="${DIAL_R}"/>
-      <circle class="dial-arc" id="dial-arc" cx="110" cy="110" r="${DIAL_R}" transform="rotate(-90 110 110)" stroke-dasharray="${DIAL_C.toFixed(2)}" stroke-dashoffset="0"/>
-      <g class="dial-knob" id="dial-knob"><circle cx="110" cy="${110-DIAL_R}" r="7.5"/></g>
-    </svg>
-    <div class="dial-center"><div class="dial-round" id="dial-round"></div><div class="dial-time" id="dial-time"></div><div class="dial-label" id="dial-label"></div></div>`;
-  }
-  function timerPanelInner(){
-    return `
-      <div class="pc-panel-title" style="align-self:flex-start;">Timer<span>generale</span></div>
-      <div class="pc-turno-pills" id="dial-rounds">${Array.from({length:GAME.rounds},(_,i)=>`<span class="pc-turno-badge" data-round="${i+1}">${GAME.rounds>2?"T":"Turno "}${i+1}</span>`).join("")}</div>
-      <div class="pc-dial" id="pc-dial">${dialSvg()}</div>
-      <div class="pc-phase-pills">${PHASES.map((ph,i)=>`<div class="pc-phase-pill" data-ph="${i}">${ph}</div>`).join("")}</div>
-      <div class="pc-timer-controls">
-        <div class="row wrap" style="grid-template-columns:repeat(${Math.min(GAME.rounds,4)},minmax(0,1fr));">
-          ${Array.from({length:GAME.rounds},(_,i)=>`<button class="pc-btn dark small" data-act="start-t" data-n="${i+1}">Avvia T${i+1}</button>`).join("")}
-        </div>
-        <div class="row"><button class="pc-btn ghost small" data-act="pause-t" id="pause-btn">Pausa</button><button class="pc-btn ghost small" data-act="reset-t">Azzera</button></div>
-      </div>`;
-  }
-  function updateDial(){
-    const dial=$("#pc-dial"); if(!dial) return;
-    const rem=remainingSeconds(), up=timer.currentTurno>0&&rem<=0, p=currentPhaseIndex(), frac=timer.total?Math.max(0,Math.min(1,rem/timer.total)):1;
-    const label=timer.currentTurno===0?"Pronti a partire":up?"Tempo scaduto":(timer.running?PHASES[p]:"In pausa");
-    $("#dial-time").innerHTML=fmtTime(rem).replace(":",'<span class="dial-colon">:</span>');
-    $("#dial-label").textContent=label;
-    $("#dial-round").textContent=timer.currentTurno?"Turno "+timer.currentTurno:TURNO_MINUTES+" min a turno";
-    $("#dial-arc").setAttribute("stroke-dashoffset",(DIAL_C*(1-frac)).toFixed(2));
-    $("#dial-knob").style.transform=`rotate(${(360*frac).toFixed(2)}deg)`;
-    dial.classList.toggle("running",timer.running); dial.classList.toggle("hurry",timer.running&&rem<=60&&rem>0); dial.classList.toggle("done",up);
-    const panel=$("#pc-timer-panel");
-    panel.querySelectorAll(".dial-phase,.pc-phase-pill[data-ph]").forEach(el=>{ const i=+el.dataset.ph; el.classList.toggle("reached",p>=0&&i<p); el.classList.toggle("active",p>=0&&i===p&&!up); });
-    panel.querySelectorAll("#dial-rounds [data-round]").forEach(el=>el.classList.toggle("active",+el.dataset.round===timer.currentTurno));
-    panel.querySelectorAll('[data-act="start-t"]').forEach(el=>el.classList.toggle("current",+el.dataset.n===timer.currentTurno));
-    const pb=$("#pause-btn"); if(pb){ pb.textContent=timer.running?"Pausa":"Riprendi"; pb.disabled=!timer.currentTurno||up; }
-  }
-  function teamTilesHtml(){
-    return TEAM_IDS.map((id,idx)=>{
-      const t=teams[id], status=statusFor(id), st=recipeStats(t.recipe);
-      const cls=status==="in_corso"?"t-live":status==="completata"?"t-done":status==="terminato"?"t-over":"";
-      const sub=t.cakeName?"🎂 "+escapeHtml(t.cakeName):(st.layers?`${st.layers} strat${st.layers===1?"o":"i"}${st.decoTypes?` · ${st.decoTypes} decor.`:""}`:"nessun progetto");
-      return `<button class="pc-tile ${cls}" data-act="open-team" data-id="${id}" style="--i:${idx}">
-          <div class="pc-tile-body">
-            <div class="pc-tile-top"><span class="pc-tile-round">Turno ${teamTurno(id)}</span>${statusPill(status)}</div>
-            <div class="pc-tile-name">${escapeHtml(teamName(id))}</div>
-            <div class="pc-tile-foot"><div class="pc-tile-pizza">${sub}</div>${st.layers?`<img class="pc-tile-thumb" src="${cakeThumb(id)}" alt="">`:""}</div>
-          </div>
-        </button>`;
-    }).join("");
-  }
-  function teamGridStyle(){ const n=TEAM_IDS.length, cols=n<=3?n:n<=4?2:n<=9?3:4, rows=Math.ceil(n/cols); return `grid-template-columns:repeat(${cols},minmax(0,1fr)); grid-template-rows:repeat(${rows},minmax(0,1fr));`; }
-  let tilesSig="";
-  function renderOrganizer(){
-    root.innerHTML=`
-      <div class="pc-topbar">
-        <div class="pc-brand"><span class="pc-brand-mark"></span>Zeelandia Cake Contest</div>
-        <div class="pc-topbar-right">
-          <div class="pc-topbar-meta">${GAME.participants} partecipanti · ${GAME.rounds} ${GAME.rounds===1?"turno":"turni"} · ${TEAM_IDS.length} squadre (${perTeamText()} a squadra) · ${TURNO_MINUTES} min a turno</div>
-          <button class="pc-btn ghost-inv small" data-act="goto" data-v="rules">📜 Regole</button>
-          <button class="pc-btn ghost-inv small" data-act="goto" data-v="ingredients">🧾 Prodotti</button>
-          <button class="pc-btn ghost-inv small" data-act="goto" data-v="settings">⚙ Impostazioni</button>
-        </div>
-      </div>
-      ${waveSvg("var(--yellow)")}
-      <div class="pc-dash-grid">
-        <section class="pc-panel pc-panel-timer" id="pc-timer-panel">${timerPanelInner()}</section>
-        <section class="pc-panel pc-panel-teams">
-          <div class="pc-panel-title">Squadre<span>tocca una squadra per progettare la torta</span></div>
-          <div class="pc-team-grid" id="pc-team-grid" style="${teamGridStyle()}">${tilesSig=teamTilesHtml()}</div>
-        </section>
-      </div>`;
-    updateDial();
-    const g=$("#pc-team-grid"); setTimeout(()=>{ if(g.isConnected) g.classList.add("settled"); },900);
-  }
-  function updateOrganizerLive(){ updateDial(); const g=$("#pc-team-grid"); if(!g) return; const html=teamTilesHtml(); if(html!==tilesSig){ tilesSig=html; g.innerHTML=html; } }
-
-  // ===================== IMPOSTAZIONI =====================
-  function renderSettings(){
-    const cats=CAT_TAB.map(catKey=>{
-      const cat=INGREDIENTS[catKey];
-      return `<div class="pc-cat-col">
-          <div class="pc-cat-col-head"><span class="pc-cat-col-title">${cat.label}</span><span class="pc-cat-col-hint">${cat.hint}</span></div>
-          <div class="pc-cat-col-chips">${cat.items.map(it=>`<span class="pc-ing-chip">${escapeHtml(it.n)}<button data-act="rm-ing" data-cat="${catKey}" data-id="${it.id}" aria-label="Rimuovi ${escapeHtml(it.n)}">✕</button></span>`).join("")||`<span class="pc-sub" style="margin:0;font-size:11px;">Nessun prodotto.</span>`}</div>
-          <div class="pc-ing-add-row"><input class="pc-name-input" type="text" placeholder="Nuovo prodotto…" data-cat-input="${catKey}" id="add-${catKey}" maxlength="40" /><button class="pc-btn dark small" data-act="add-ing" data-cat="${catKey}" aria-label="Aggiungi a ${cat.label}">+</button></div>
-        </div>`;
-    }).join("");
-    root.innerHTML=`
-      <div class="pc-team-bg"><div class="pc-team-card-wrap">
-        <div class="pc-fixed-header">${backLink()}
-          <div class="pc-header"><div class="pc-eyebrow">Configurazione evento</div><div class="pc-title">Impostazioni</div>
-            <div class="pc-sub">Imposta la gara (partecipanti, turni, squadre, tempi), scrivi le regole, dai i nomi alle squadre e personalizza i prodotti Zeelandia categoria per categoria.</div></div>
-        </div>
-        <div class="pc-team-top-row">
-          <div class="pc-card pc-setup-card"><span class="pc-field-label" style="margin-bottom:8px;">Impostazioni gara</span>
-            <div class="pc-setup-grid">
-              ${setupField("participants","Partecipanti","persone",GAME.participants)}
-              ${setupField("rounds","Turni","in sequenza",GAME.rounds)}
-              ${setupField("teamsPerRound","Squadre per turno","per gruppo",GAME.teamsPerRound)}
-              ${setupField("minutes","Durata turno","minuti",TURNO_MINUTES)}
-              ${setupField("maxLayers","Max strati","impasti + farciture",GAME.maxLayers)}
-              ${setupField("maxDecos","Max decorazioni","tipi diversi",GAME.maxDecos)}
-              ${setupField("alertMinutes","Avviso “Decora!”","min alla fine, 0 = off",GAME.alertMinutes)}
-            </div>
-            <p class="pc-settings-note" id="setup-summary" style="margin-top:8px;">${setupSummary()}</p></div>
-          <div class="pc-card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column;"><label class="pc-field-label" for="rules-input" style="margin-bottom:7px;">Regole della gara</label>
-            <textarea class="pc-rules-textarea" id="rules-input" placeholder="Scrivi qui le regole…">${escapeHtml(RULES_TEXT)}</textarea></div>
-          <div class="pc-card pc-names-card"><span class="pc-field-label" style="margin-bottom:7px;">Nomi delle squadre</span><div class="pc-names-list" id="team-names">${teamNamesHtml()}</div></div>
-        </div>
-        <div class="pc-fixed-scroll"><div class="pc-cat-columns">${cats}</div></div>
-      </div></div>`;
-  }
-  function setupField(key,label,unit,val){ const [mn,mx]=LIMITS[key]; return `<label class="pc-setup-field"><span>${label}</span><input type="number" inputmode="numeric" class="pc-minutes-input" data-setup="${key}" id="setup-${key}" min="${mn}" max="${mx}" value="${val}" /><small>${unit}</small></label>`; }
-  function teamNamesHtml(){
-    let out="";
-    for(let r=1;r<=GAME.rounds;r++){
-      out+=`<div class="pc-name-round">Turno ${r}</div>`;
-      out+=TEAM_IDS.filter(id=>teamTurno(id)===r).map(id=>`<input class="pc-name-input" data-teamname="${id}" id="tn-${id}" value="${escapeHtml(teams[id].name)}" placeholder="${defaultName(id)}" maxlength="40" aria-label="Nome di ${defaultName(id)}, turno ${r}">`).join("");
-    }
-    return out;
-  }
-  const setupSummary = () => `${TEAM_IDS.length} squadre, circa ${perTeamText()} persone a squadra. La durata vale dal prossimo avvio o azzeramento.`;
-  function applySetup(key,raw){
-    const [mn,mx]=LIMITS[key];
-    let v=parseInt(raw,10); if(isNaN(v)) v=key==="minutes"?TURNO_MINUTES:GAME[key];
-    v=Math.max(mn,Math.min(mx,v));
-    if(key==="minutes"){ TURNO_MINUTES=v; if(timer.currentTurno===0){ timer.duration=turnoSeconds(); timer.total=turnoSeconds(); } }
-    else {
-      GAME[key]=v;
-      if(key==="rounds"||key==="teamsPerRound"){ buildTeamIds(); ensureTeams(); if(timer.currentTurno>GAME.rounds) orgResetTurno(); const tn=document.getElementById("team-names"); if(tn) tn.innerHTML=teamNamesHtml(); }
-    }
-    const inp=document.getElementById("setup-"+key); if(inp) inp.value=v;
-    const sum=document.getElementById("setup-summary"); if(sum) sum.textContent=setupSummary();
-  }
-  function slugify(s){ return (s||"").toString().toLowerCase().trim().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"")||"prodotto"; }
-  function addIngredient(catKey,name){
-    name=(name||"").trim(); const cat=INGREDIENTS[catKey];
-    if(!name||!cat) return;
-    if(Object.values(ITEM).some(it=>it.n.toLowerCase()===name.toLowerCase())){ toast(`“${name}” è già in elenco.`); return; }
-    let id=slugify(name), i=2; while(ITEM[id]){ id=slugify(name)+"_"+i; i++; }
-    const d=cat.def, h=hashHue(id);
-    cat.items.push({id, n:name, g:"Altri prodotti", col:hsl2hex(h,d.role==="coat"?30:55,d.role==="coat"?88:60), kind:d.kind, role:d.role, alt:[], drole:d.role, dkind:d.kind});
-    indexItems(); render();
-    const inp=document.getElementById("add-"+catKey); if(inp) inp.focus();
-  }
-  function removeIngredient(catKey,id){
-    const cat=INGREDIENTS[catKey]; if(!cat) return;
-    cat.items=cat.items.filter(it=>it.id!==id); indexItems();
-    Object.values(teams).forEach(t=>{ const r=t.recipe; if(r.coat===id) r.coat=null; r.layers=r.layers.filter(l=>l.ingId!==id); r.decos=r.decos.filter(d=>d.ingId!==id); });
-    render();
-  }
-
-  // ===================== CATALOGO PRODOTTI =====================
-  function renderIngredientsCatalog(){
-    const cols=CAT_TAB.map(catKey=>{
-      const cat=INGREDIENTS[catKey]; let lastG=null;
-      const rows=cat.items.map(it=>{ const head=it.g!==lastG?`<div class="pc-cat-col-group">${escapeHtml(it.g)}</div>`:""; lastG=it.g;
-        return head+`<div class="pc-ing-row"><div class="pc-ing-row-icon">${thumbImg(it.id)}</div><div class="pc-ing-row-name">${escapeHtml(it.n)}</div></div>`; }).join("");
-      return `<div class="pc-cat-col"><div class="pc-cat-col-head"><span class="pc-cat-col-title">${cat.label}</span><span class="pc-cat-col-hint">${cat.hint}</span></div><div class="pc-ing-rows">${rows}</div></div>`;
-    }).join("");
-    root.innerHTML=`
-      <div class="pc-team-bg"><div class="pc-team-card-wrap">
-        <div class="pc-fixed-header">${backLink()}
-          <div class="pc-header"><div class="pc-eyebrow">Riferimento visivo</div><div class="pc-title">Prodotti Zeelandia</div><div class="pc-sub">Tutti i prodotti disponibili per progettare la torta, divisi per categoria come su zeelandia.it.</div></div>
-        </div>
-        <div class="pc-fixed-scroll"><div class="pc-cat-columns">${cols}</div></div>
-      </div></div>`;
-  }
-
-  // ===================== REGOLE =====================
-  const RULE_ICONS=[
-    [/forno|cuoc|inforn|bake|oven/i,"🔥"], [/present|giuria|giudic|foto|judge|photo/i,"📸"], [/decor|copri|copert|glass/i,"✨"],
-    [/farc|mont|strat|crema/i,"🍰"], [/prepar|organi|postazion/i,"🔪"], [/disegn|progett|draw|design/i,"✏️"], [/\bnome|\bname/i,"🏷️"],
-    [/scegli|prodott|ingredien|select/i,"🧺"], [/pulis|clean/i,"🧽"], [/tempo|minut|time/i,"⏱️"],
-  ];
-  const ruleIcon = t => (RULE_ICONS.find(([re])=>re.test(t))||[0,"🎂"])[1];
-  function rulesGridStyle(n){ const cols=n<=3?n:n===4?2:n<=6?3:n<=12?4:5, pcols=n<=3?1:n<=12?2:3; return `--c:${cols}; --r:${Math.ceil(n/cols)}; --pc:${pcols}; --pr:${Math.ceil(n/pcols)};`; }
-  function renderRules(){
-    const steps=(RULES_TEXT||"").split("\n").map(l=>l.replace(/^\s*(?:\d+\s*[.)\-:]|[-•*])\s*/,"").trim()).filter(Boolean);
-    const q=TURNO_MINUTES/4, mm=v=>fmtNum(v,1);
-    const phases=`<div class="rl-phases"><div class="rl-phase-label">Il tuo turno da ${TURNO_MINUTES} minuti</div>${PHASES.map((ph,i)=>`<div class="rl-phase"><b>${ph}</b><span>${mm(i*q)}–${mm((i+1)*q)} min</span></div>`).join("")}</div>`;
-    const body=steps.length
-      ? `<div class="rl-grid" style="${rulesGridStyle(steps.length)}">${steps.map((t,i)=>`<div class="rl-card" style="--i:${i}"><div class="rl-top"><span class="rl-num">${i+1}</span><span class="rl-icon" aria-hidden="true">${ruleIcon(t)}</span></div><div class="rl-text">${escapeHtml(t)}</div></div>`).join("")}</div>`
-      : `<div class="rl-empty"><div><div>📜</div>Nessuna regola inserita.<br>Vai in ⚙ Impostazioni per scriverle.</div></div>`;
-    root.innerHTML=`
-      <div class="pc-team-bg"><div class="pc-team-card-wrap">
-        <div class="pc-fixed-header">${backLink()}<div class="pc-header"><div class="pc-eyebrow">Da leggere prima di iniziare</div><div class="pc-title">Regole della gara</div></div></div>
-        <div class="pc-fixed-scroll rl-scroll"><div class="rl-wrap">${phases}${body}</div></div>
-      </div></div>`;
-  }
-
-  // ===================== PAGINA SQUADRA: PROGETTAZIONE TORTA =====================
-  function openTeam(id){ selectedTeam=id; activeCat="impasti"; view="team"; render(); }
-  const curTeam = () => teams[selectedTeam];
-  const isLocked = () => statusFor(selectedTeam)==="terminato";
-  function clockHtml(){
-    const my=teamTurno(selectedTeam);
-    if(timer.currentTurno===my){ const p=currentPhaseIndex(); return `<b>${fmtTime(remainingSeconds())}</b><span>${timeUp()?"tempo scaduto":timer.running?PHASES[p]:"in pausa"}</span>`; }
-    if(timer.currentTurno>my) return `<b>--:--</b><span>turno ${my} finito</span>`;
-    return `<b>${fmtTime(turnoSeconds())}</b><span>turno ${my} non iniziato</span>`;
-  }
+  // ===================== PROGETTAZIONE TORTA =====================
   const ICON_ADJUST='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 4h7M13 4h1M2 8h2M8 8h6M2 12h8"/><circle cx="11" cy="4" r="1.6"/><circle cx="6" cy="8" r="1.6"/><circle cx="12" cy="12" r="1.6"/></svg>';
 
   function usedCount(r,id){ return r.layers.filter(l=>l.ingId===id).length + (r.decos.find(d=>d.ingId===id)||{count:0}).count; }
   function tabsHtml(){
-    const r=curTeam().recipe;
+    const r=cake.recipe;
     return CAT_TAB.map(c=>{
       const n=INGREDIENTS[c].items.filter(it=>r.coat===it.id||r.layers.some(l=>l.ingId===it.id)||r.decos.some(d=>d.ingId===it.id)).length;
       return `<button role="tab" class="dz-tab" data-act="dz-tab" data-v="${c}" aria-selected="${c===activeCat}" title="${INGREDIENTS[c].label}">${TAB_SHORT[c]||INGREDIENTS[c].label}${n?`<b>${n}</b>`:""}</button>`;
     }).join("");
   }
   function tilesHtml(){
-    const r=curTeam().recipe, locked=isLocked(); let lastG=null;
+    const r=cake.recipe; let lastG=null;
     return INGREDIENTS[activeCat].items.map((it,idx)=>{
       const head=it.g!==lastG?`<div class="dz-group">${escapeHtml(it.g)}</div>`:""; lastG=it.g;
       const sel=r.coat===it.id, n=usedCount(r,it.id);
       return head+`<div class="dz-tile ${sel?"sel":""} ${n?"on":""} ${lastPicked===it.id?"pop":""}" style="--i:${idx}">
-          <button class="dz-tbtn" data-act="dz-pick" data-id="${it.id}" ${locked?"disabled":""} aria-label="${ROLE_LABEL[it.role]}: ${escapeHtml(it.n)}"><span class="dz-thumb">${thumbImg(it.id)}</span><span class="dz-tn">${escapeHtml(it.n)}</span></button>
+          <button class="dz-tbtn" data-act="dz-pick" data-id="${it.id}" aria-label="${ROLE_LABEL[it.role]}: ${escapeHtml(it.n)}"><span class="dz-thumb">${thumbImg(it.id)}</span><span class="dz-tn">${escapeHtml(it.n)}</span></button>
           <span class="dz-role">${ROLE_LABEL[it.role]}${it.alt.length?" +":""}</span>
           ${n?`<span class="dz-badge">${n}</span>`:sel?`<span class="dz-badge">✓</span>`:""}
           <button class="dz-tedit" data-act="dz-adjust" data-id="${it.id}" aria-label="Opzioni di ${escapeHtml(it.n)}">${ICON_ADJUST}</button>
         </div>`;
-    }).join("")||`<p class="dz-empty">Nessun prodotto in questa categoria. Aggiungili in ⚙ Impostazioni.</p>`;
+    }).join("");
   }
   function noteHtml(){
-    const st=recipeStats(curTeam().recipe);
-    if(isLocked()) return ["warn","Turno finito: il progetto è bloccato. Puoi ancora confermarlo o salvare il PDF."];
+    const st=recipeStats(cake.recipe);
     if(activeCat==="impasti") return ["","Ogni tocco aggiunge uno strato in cima. Alterna impasti e farciture."];
     if(activeCat==="coperture") return ["","Scegli una copertura; toccala di nuovo per toglierla."];
-    if(activeCat==="decorazioni") return [st.decoTypes>=GAME.maxDecos?"warn":"",`Tocca per mettere decorazioni sulla torta, di nuovo per aggiungerne. Max ${GAME.maxDecos} tipi.`];
-    if(st.layers>=GAME.maxLayers) return ["warn",`Hai raggiunto ${GAME.maxLayers} strati. Togline uno per aggiungerne altri.`];
+    if(activeCat==="decorazioni") return [st.decoTypes>=MAX_DECOS?"warn":"",`Tocca per mettere decorazioni sulla torta, di nuovo per aggiungerne. Max ${MAX_DECOS} tipi.`];
+    if(st.layers>=MAX_LAYERS) return ["warn",`Hai raggiunto ${MAX_LAYERS} strati. Togline uno per aggiungerne altri.`];
     return ["","Tocca un prodotto per usarlo. Con ⚙ in alto a sinistra puoi usarlo in un altro modo (strato, copertura, decorazione)."];
   }
   function layersHtml(){
-    const r=curTeam().recipe, locked=isLocked()?"disabled":"";
-    const coat=r.coat&&ITEM[r.coat]?`<li class="dz-sec">Copertura</li><li class="dz-layer"><span class="dz-thumb sm">${thumbImg(r.coat)}</span><div class="dz-lname">${escapeHtml(nameOf(r.coat))}<small>${INGREDIENTS[catOf(r.coat)].label}</small></div><button class="dz-ibtn rm" data-act="dz-rm-coat" title="Togli" aria-label="Togli copertura" ${locked}>×</button></li>`:"";
+    const r=cake.recipe;
+    const coat=r.coat&&ITEM[r.coat]?`<li class="dz-sec">Copertura</li><li class="dz-layer"><span class="dz-thumb sm">${thumbImg(r.coat)}</span><div class="dz-lname">${escapeHtml(nameOf(r.coat))}<small>${INGREDIENTS[catOf(r.coat)].label}</small></div><button class="dz-ibtn rm" data-act="dz-rm-coat" title="Togli" aria-label="Togli copertura">×</button></li>`:"";
     const decos=r.decos.filter(d=>ITEM[d.ingId]).map(d=>`
       <li class="dz-layer ${d.id===newLayerId?"new":""}" data-deco="${d.id}">
         <span class="dz-thumb sm">${thumbImg(d.ingId)}</span>
         <div class="dz-lname">${escapeHtml(nameOf(d.ingId))}<small>Decorazione · pezzi</small></div>
-        <div class="dz-step"><button data-act="dz-dec" aria-label="Uno in meno" ${locked}>−</button><input type="number" inputmode="numeric" min="1" max="99" value="${d.count}" data-field="count" aria-label="Pezzi di ${escapeHtml(nameOf(d.ingId))}" ${locked}><button data-act="dz-inc" aria-label="Uno in più" ${locked}>+</button></div>
-        <button class="dz-ibtn" data-act="dz-reshuffle" title="Mescola posizioni" aria-label="Mescola posizioni" ${locked}>⟳</button>
-        <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(nameOf(d.ingId))}" ${locked}>×</button>
+        <div class="dz-step"><button data-act="dz-dec" aria-label="Uno in meno">−</button><input type="number" inputmode="numeric" min="1" max="99" value="${d.count}" data-field="count" aria-label="Pezzi di ${escapeHtml(nameOf(d.ingId))}"><button data-act="dz-inc" aria-label="Uno in più">+</button></div>
+        <button class="dz-ibtn" data-act="dz-reshuffle" title="Mescola posizioni" aria-label="Mescola posizioni">⟳</button>
+        <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(nameOf(d.ingId))}">×</button>
       </li>`).join("");
     const ls=r.layers.filter(l=>ITEM[l.ingId]);
     const layers=ls.slice().reverse().map((l,k)=>{ const it=ITEM[l.ingId], lk=kindFor(it,"layer"); return `
       <li class="dz-layer ${l.id===newLayerId?"new":""}" data-layer="${l.id}">
         <span class="dz-thumb sm">${thumbImg(l.ingId)}</span>
         <div class="dz-lname">${escapeHtml(it.n)}<small>Strato ${ls.length-k} · ${(LAYER_DEF[lk]||LAYER_DEF.sponge)[2]} · spessore</small></div>
-        <div class="dz-step"><button data-act="dz-dec" aria-label="Più sottile" ${locked}>−</button><input type="number" inputmode="numeric" min="1" max="6" value="${l.thick}" data-field="thick" aria-label="Spessore di ${escapeHtml(it.n)}" ${locked}><button data-act="dz-inc" aria-label="Più spesso" ${locked}>+</button></div>
-        <div class="dz-ud"><button class="dz-ibtn" data-act="dz-up" title="Sposta su" aria-label="Sposta su" ${locked}>↑</button><button class="dz-ibtn" data-act="dz-down" title="Sposta giù" aria-label="Sposta giù" ${locked}>↓</button></div>
-        <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(it.n)}" ${locked}>×</button>
+        <div class="dz-step"><button data-act="dz-dec" aria-label="Più sottile">−</button><input type="number" inputmode="numeric" min="1" max="6" value="${l.thick}" data-field="thick" aria-label="Spessore di ${escapeHtml(it.n)}"><button data-act="dz-inc" aria-label="Più spesso">+</button></div>
+        <div class="dz-ud"><button class="dz-ibtn" data-act="dz-up" title="Sposta su" aria-label="Sposta su">↑</button><button class="dz-ibtn" data-act="dz-down" title="Sposta giù" aria-label="Sposta giù">↓</button></div>
+        <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(it.n)}">×</button>
       </li>`; }).join("");
     return coat + (decos?`<li class="dz-sec">Decorazioni</li>${decos}`:"") + `<li class="dz-sec">Strati (dall'alto)</li>` + (layers||`<li class="dz-empty">Nessuno strato. Inizia da un impasto.</li>`);
   }
   function shapeHtml(){
-    const r=curTeam().recipe, dis=isLocked()?"disabled":"";
-    return `<span>Forma</span><div class="dz-seg">${[["round","● Rotonda"],["square","■ Quadrata"]].map(([v,l])=>`<button data-act="dz-shape" data-v="${v}" aria-pressed="${r.shape===v}" ${dis}>${l}</button>`).join("")}</div>
-      <span>Piani</span><div class="dz-seg">${[1,2,3].map(n=>`<button data-act="dz-tiers" data-v="${n}" aria-pressed="${(r.tiers||1)===n}" ${dis}>${n}</button>`).join("")}</div>`;
+    const r=cake.recipe;
+    return `<span>Forma</span><div class="dz-seg">${[["round","● Rotonda"],["square","■ Quadrata"]].map(([v,l])=>`<button data-act="dz-shape" data-v="${v}" aria-pressed="${r.shape===v}">${l}</button>`).join("")}</div>
+      <span>Piani</span><div class="dz-seg">${[1,2,3].map(n=>`<button data-act="dz-tiers" data-v="${n}" aria-pressed="${(r.tiers||1)===n}">${n}</button>`).join("")}</div>`;
   }
   function footerHtml(){
-    const st=recipeStats(curTeam().recipe);
+    const st=recipeStats(cake.recipe);
     return `<div class="pc-footer-stats">
-        <div><span class="pc-footer-count">${st.layers}/${GAME.maxLayers}</span> <span class="pc-footer-note">strati · ${st.decoTypes}/${GAME.maxDecos} decorazioni · ${st.pieces} pezzi</span></div>
+        <div><span class="pc-footer-count">${st.layers}</span> <span class="pc-footer-note">strati · ${st.decoTypes} decorazioni · ${st.pieces} pezzi</span></div>
         <div class="pc-footer-note ${st.bases?"ok":"warn"}">${st.bases?"✓ impasto presente":"manca un impasto"}</div>
         <div class="pc-footer-note ${st.hasCoat?"ok":""}">${st.hasCoat?"✓ copertura":"senza copertura"}</div>
       </div>
-      <div class="pc-footer-btns">
-        <button class="pc-btn ghost small" data-act="dz-pdf">⬇ Scheda PDF</button>
-        <button class="pc-btn primary" data-act="dz-confirm" ${(!st.bases||st.overL||st.overD)?"disabled":""}>Conferma torta</button>
-      </div>`;
+      <div class="pc-footer-btns"><button class="pc-btn primary" data-act="dz-pdf">⬇ Scheda PDF</button></div>`;
   }
-  function renderTeam(){
-    const id=selectedTeam, t=curTeam(), status=statusFor(id);
-    lastTeamStatus=status;
-    const confirmed=status==="completata";
-    const head=`
-      <div class="dz-head">
-        <div class="dz-idblock">${backLink("← monitor")}
-          <div><div class="pc-eyebrow">Turno ${teamTurno(id)}</div>
-            <div style="display:flex;align-items:center;gap:.6em;"><div class="pc-title" id="dz-title">${escapeHtml(teamName(id))}</div><span id="dz-pill">${statusPill(status)}</span></div></div>
+  function render(){
+    root.innerHTML=`
+      <div class="pc-team-bg dz">
+        <div class="dz-head">
+          <div class="dz-idblock"><div><div class="pc-eyebrow">Zeelandia · progettazione torta</div><div class="pc-title" id="dz-title">${escapeHtml(cakeTitle())}</div></div></div>
+          <div class="dz-fields"><label><span class="pc-field-label">Nome della torta</span><input class="pc-name-input" id="cake-name" value="${escapeHtml(cake.name)}" placeholder="es. Sogno di Bosco" maxlength="40" /></label></div>
         </div>
-        <div class="dz-fields">
-          <label><span class="pc-field-label">Nome squadra</span><input class="pc-name-input" id="team-name" value="${escapeHtml(t.name)}" placeholder="${defaultName(id)}" maxlength="40" ${confirmed?"disabled":""} /></label>
-          <label><span class="pc-field-label">Nome della torta</span><input class="pc-name-input" id="cake-name" value="${escapeHtml(t.cakeName)}" placeholder="es. Sogno di Bosco" maxlength="40" ${confirmed?"disabled":""} /></label>
-        </div>
-        <div class="dz-clock" id="dz-clock">${clockHtml()}</div>
-      </div>`;
-    const stage=`<div class="dz-stage"><canvas id="dz-cv" width="1200" height="1200" role="img" aria-label="Disegno della torta"></canvas></div>`;
-    if(confirmed){
-      const r=t.recipe;
-      const tags=r.layers.filter(l=>ITEM[l.ingId]).map(l=>`<span>${escapeHtml(nameOf(l.ingId))}</span>`)
-        .concat(r.coat&&ITEM[r.coat]?[`<span class="coat">${escapeHtml(nameOf(r.coat))}</span>`]:[])
-        .concat(r.decos.filter(d=>ITEM[d.ingId]).map(d=>`<span class="deco"><b>${d.count}×</b>${escapeHtml(nameOf(d.ingId))}</span>`)).join("");
-      root.innerHTML=`
-        <div class="pc-team-bg dz">${head}
-          <div class="dz-bench">${stage}
-            <div class="dz-side"><div class="dz-box dz-confirmed">
-              <svg class="dz-check" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30"/><path d="M19 33 l9 9 l17 -19"/></svg>
-              <h4>Progetto consegnato</h4>
-              <p>${escapeHtml(teamName(id))} ha confermato la sua torta.</p>
-              <div class="pizza-name">${t.cakeName?escapeHtml(t.cakeName):"Torta senza nome"}</div>
-              <div class="dz-tags">${tags}</div>
-              <div style="display:flex;gap:10px;justify-content:center;margin-top:1em;flex-wrap:wrap;">
-                <button class="pc-btn ghost small" data-act="dz-edit">Modifica progetto</button>
-                <button class="pc-btn gold small" data-act="dz-pdf">⬇ Scheda PDF</button>
+        <div class="dz-bench">
+          <div class="dz-stage"><canvas id="dz-cv" width="1200" height="1200" role="img" aria-label="Disegno della torta"></canvas></div>
+          <div class="dz-side">
+            <section class="dz-box dz-lib" aria-label="Prodotti">
+              <div class="dz-tabs" role="tablist" id="dz-tabs">${tabsHtml()}</div>
+              <p class="dz-note" id="dz-note"></p>
+              <div class="dz-tiles" id="dz-tiles">${tilesHtml()}</div>
+            </section>
+            <section class="dz-box dz-rec" aria-label="La torta">
+              <div class="dz-rechead"><h3>La torta</h3>
+                <button class="pc-btn ghost small" data-act="dz-shuffle">Mescola</button>
+                <button class="pc-btn ghost small" data-act="dz-clear" id="dz-clear">Svuota</button>
               </div>
-            </div></div>
+              <div class="dz-shape" id="dz-shape">${shapeHtml()}</div>
+              <ul class="dz-layers" id="dz-layers">${layersHtml()}</ul>
+            </section>
           </div>
-        </div>`;
-    } else {
-      const [nc,nt]=noteHtml();
-      root.innerHTML=`
-        <div class="pc-team-bg dz">${head}
-          <div class="dz-bench">${stage}
-            <div class="dz-side">
-              <section class="dz-box dz-lib" aria-label="Prodotti">
-                <div class="dz-tabs" role="tablist" id="dz-tabs">${tabsHtml()}</div>
-                <p class="dz-note ${nc}" id="dz-note">${nt}</p>
-                <div class="dz-tiles" id="dz-tiles">${tilesHtml()}</div>
-              </section>
-              <section class="dz-box dz-rec" aria-label="La torta">
-                <div class="dz-rechead"><h3>La torta</h3>
-                  <button class="pc-btn ghost small" data-act="dz-shuffle" ${isLocked()?"disabled":""}>Mescola</button>
-                  <button class="pc-btn ghost small" data-act="dz-clear" id="dz-clear" ${isLocked()?"disabled":""}>Svuota</button>
-                </div>
-                <div class="dz-shape" id="dz-shape">${shapeHtml()}</div>
-                <ul class="dz-layers" id="dz-layers">${layersHtml()}</ul>
-              </section>
-            </div>
-          </div>
-          <div class="pc-recipe-footer" id="dz-footer">${footerHtml()}</div>
-        </div>`;
-    }
-    drawTeamCake(); scheduleFit();
+        </div>
+        <div class="pc-recipe-footer" id="dz-footer">${footerHtml()}</div>
+      </div>`;
+    const [nc,nt]=noteHtml(); const n=$("#dz-note"); n.className="dz-note "+nc; n.textContent=nt;
+    drawCakeCanvas(); scheduleFit();
   }
   let lastPicked=null, newLayerId=null, cakeAnim=null, animRaf=0;
-  function drawTeamCake(){
+  function drawCakeCanvas(){
     const cv=$("#dz-cv"); if(!cv) return;
     const ctx=cv.getContext("2d");
-    if(!cakeAnim||window.matchMedia("(prefers-reduced-motion:reduce)").matches){ cakeAnim=null; drawCake(ctx,cv.width,curTeam().recipe); return; }
+    if(!cakeAnim||window.matchMedia("(prefers-reduced-motion:reduce)").matches){ cakeAnim=null; drawCake(ctx,cv.width,cake.recipe); return; }
     cancelAnimationFrame(animRaf);
     const a=cakeAnim, t0=performance.now(), dur=a.coat!=null?600:650;
     const step=now=>{
       const t=Math.min(1,(now-t0)/dur);
       if(!$("#dz-cv")) return;
-      drawCake(ctx,cv.width,curTeam().recipe,t<1?{anim:{layer:a.layer,deco:a.deco,from:a.from||0,t,coat:a.coat!=null?t:null}}:{});
+      drawCake(ctx,cv.width,cake.recipe,t<1?{anim:{layer:a.layer,deco:a.deco,from:a.from||0,t,coat:a.coat!=null?t:null}}:{});
       if(t<1) animRaf=requestAnimationFrame(step); else cakeAnim=null;
     };
     animRaf=requestAnimationFrame(step);
   }
   function animateTilesEnter(){ const el=$("#dz-tiles"); if(!el) return; el.scrollTop=0; el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("enter"),900); }
   function refreshDesigner(){
-    if(view!=="team"||!$("#dz-tiles")){ if(view==="team") drawTeamCake(); return; }
     $("#dz-tabs").innerHTML=tabsHtml();
     const tl=$("#dz-tiles"), sc=tl.scrollTop; tl.innerHTML=tilesHtml(); tl.scrollTop=sc;
     const [nc,nt]=noteHtml(); const n=$("#dz-note"); n.className="dz-note "+nc; n.textContent=nt;
@@ -1608,57 +846,33 @@
     const prevCount=($(".pc-footer-count")||{}).textContent;
     $("#dz-footer").innerHTML=footerHtml();
     const fc=$(".pc-footer-count"); if(fc&&prevCount&&fc.textContent!==prevCount) fc.classList.add("bump");
-    drawTeamCake(); scheduleFit();
+    drawCakeCanvas(); scheduleFit();
     lastPicked=null; newLayerId=null;
   }
-  function updateTeamLive(){ const s=statusFor(selectedTeam); if(s!==lastTeamStatus){ render(); return; } const c=$("#dz-clock"); if(c) c.innerHTML=clockHtml(); }
 
   function useAs(id,role){
-    if(isLocked()||!ITEM[id]) return;
-    const r=curTeam().recipe, st=recipeStats(r), m=metaOf(id);
+    if(!ITEM[id]) return;
+    const r=cake.recipe, st=recipeStats(r), m=metaOf(id);
     lastPicked=id;
     if(role==="coat"){ r.coat=r.coat===id?null:id; cakeAnim=r.coat?{coat:0}:null; refreshDesigner(); return; }
     if(role==="layer"){
-      if(st.layers>=GAME.maxLayers){ toast(`Massimo ${GAME.maxLayers} strati. Togline uno prima.`); return; }
+      if(st.layers>=MAX_LAYERS){ toast(`Massimo ${MAX_LAYERS} strati. Togline uno prima.`); return; }
       const lk=kindFor(ITEM[id],"layer"), L={id:uid(), ingId:id, thick:(LAYER_DEF[lk]||LAYER_DEF.sponge)[0], seed:newSeed()};
       r.layers.push(L); cakeAnim={layer:L.id}; newLayerId=L.id; refreshDesigner(); return;
     }
     const ex=r.decos.find(d=>d.ingId===id);
     if(ex){ const from=ex.count; ex.count=Math.min(99,ex.count+Math.max(1,Math.round(m.n/3))); cakeAnim={deco:ex.id,from}; refreshDesigner(); return; }
-    if(st.decoTypes>=GAME.maxDecos){ toast(`Massimo ${GAME.maxDecos} tipi di decorazione. Togline uno prima.`); return; }
+    if(st.decoTypes>=MAX_DECOS){ toast(`Massimo ${MAX_DECOS} tipi di decorazione. Togline uno prima.`); return; }
     const d={id:uid(), ingId:id, count:m.n, seed:newSeed()};
     r.decos.push(d); cakeAnim={deco:d.id,from:0}; newLayerId=d.id; refreshDesigner();
   }
   let clearArm=0;
   function resetClear(){ clearTimeout(clearArm); clearArm=0; const b=$("#dz-clear"); if(b){ b.textContent="Svuota"; b.classList.remove("armed"); } }
   function clearAll(btn){
-    const r=curTeam().recipe;
+    const r=cake.recipe;
     if(!r.layers.length&&!r.coat&&!r.decos.length){ toast("La torta è già vuota."); return; }
     if(!clearArm){ btn.textContent="Tocca per confermare"; btn.classList.add("armed"); clearArm=setTimeout(resetClear,3000); return; }
     resetClear(); r.layers=[]; r.coat=null; r.decos=[]; activeCat="impasti"; refreshDesigner(); toast("Torta svuotata.");
-  }
-  function confirmCake(){
-    const t=curTeam(), st=recipeStats(t.recipe);
-    if(!st.bases||st.overL||st.overD) return;
-    t.status="completata"; render();
-    const s=$(".dz-stage"); if(s) s.classList.add("celebrate");
-    confetti(); beep(784,0,.12,"sine",.2); beep(988,.1,.12,"sine",.2); beep(1319,.2,.3,"sine",.2);
-  }
-  function confetti(){
-    if(window.matchMedia("(prefers-reduced-motion:reduce)").matches) return;
-    const c=document.createElement("canvas"); c.id="pc-confetti"; document.body.appendChild(c);
-    const dpr=Math.min(2,window.devicePixelRatio||1), W=innerWidth, H=innerHeight; c.width=W*dpr; c.height=H*dpr;
-    const g=c.getContext("2d"); g.scale(dpr,dpr);
-    const cols=["#FFD60A","#FFE45C","#F5B82E","#44167E","#6A2FB0","#B597E0","#FFFFFF","#F29AC0"];
-    const P=[]; for(let i=0;i<170;i++){ const side=i%2?1:-1;
-      P.push({x:W/2+side*W*.18,y:H*.62,vx:(Math.random()*9+3)*-side*(Math.random()<.3?-.4:1),vy:-(Math.random()*15+9),w:6+Math.random()*7,h:9+Math.random()*9,r:Math.random()*6,vr:(Math.random()-.5)*.35,c:cols[i%cols.length],s:Math.random()*6}); }
-    const t0=performance.now();
-    (function f(now){
-      const t=(now-t0)/1000; g.clearRect(0,0,W,H);
-      P.forEach(p=>{ p.vy+=.42; p.vx*=.992; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr;
-        g.save(); g.translate(p.x,p.y); g.rotate(p.r); g.scale(1,Math.cos(t*8+p.s)); g.globalAlpha=Math.max(0,1-Math.max(0,t-1.8)/.8); g.fillStyle=p.c; g.fillRect(-p.w/2,-p.h/2,p.w,p.h); g.restore(); });
-      if(t<2.6) requestAnimationFrame(f); else c.remove();
-    })(t0);
   }
 
   // ---- adatta l'elenco "La torta" al riquadro ----
@@ -1672,7 +886,6 @@
     el.style.setProperty(name,steps[lo]);
   }
   function fitAll(){
-    if(view!=="team") return;
     const layers=$("#dz-layers"); if(!layers) return;
     if(window.matchMedia("(max-width:640px)").matches){ layers.className="dz-layers"; layers.style.setProperty("--rs",1); return; }
     const ok=()=>layers.scrollHeight<=layers.clientHeight+1;
@@ -1686,19 +899,19 @@
 
   // ---- scheda prodotto: usa come… + dimensioni e pesi ----
   function openSheet(id){
-    sheetIng=id; const it=ITEM[id], m=metaOf(id), roles=rolesOf(it), locked=isLocked();
+    sheetIng=id; const it=ITEM[id], m=metaOf(id), roles=rolesOf(it);
     const fld=(label,field,val,unit)=>`<label class="dz-fld">${label}<input type="number" inputmode="decimal" data-field="${field}" min="0" step="1" value="${val||""}" placeholder="0"><span class="unit">${unit}</span></label>`;
     $("#dz-sheet-body").innerHTML=`
       <div class="dz-shead"><span class="dz-thumb big">${thumbImg(id)}</span><div><h3>${escapeHtml(it.n)}</h3><span class="pc-field-label" style="margin:0;">${escapeHtml(it.g)}</span></div></div>
-      <div><span class="pc-field-label">Usa come</span><div class="dz-roles">${roles.map((ro,i)=>`<button class="pc-btn ${i?"ghost":"gold"} small" data-act="sheet-use" data-role="${ro}" ${locked?"disabled":""}>${ro==="layer"?"+ Strato":ro==="coat"?(curTeam().recipe.coat===id?"Togli copertura":"Copertura"):"+ Decorazione"}</button>`).join("")}</div></div>
+      <div><span class="pc-field-label">Usa come</span><div class="dz-roles">${roles.map((ro,i)=>`<button class="pc-btn ${i?"ghost":"gold"} small" data-act="sheet-use" data-role="${ro}">${ro==="layer"?"+ Strato":ro==="coat"?(cake.recipe.coat===id?"Togli copertura":"Copertura"):"+ Decorazione"}</button>`).join("")}</div></div>
       ${roles.includes("deco")?`<label class="dz-fld">Dimensione<input type="range" data-field="size" min="2" max="45" step="1" value="${m.size}"><output>${m.size}%</output></label>`:""}
       ${roles.includes("layer")?fld("Peso / strato","wLayer",m.wLayer,"g"):""}
       ${roles.includes("coat")?fld("Peso copertura","wCoat",m.wCoat,"g"):""}
       ${roles.includes("deco")?fld("Peso / pezzo","wDeco",m.wDeco,"g"):""}
-      <p class="pc-settings-note" style="margin:0;">Vale per tutte le squadre. Pesi riferiti a un piano Ø 24 cm e spessore 1; compaiono nella scheda PDF.</p>`;
+      <p class="pc-settings-note" style="margin:0;">Pesi riferiti a un piano Ø 24 cm e spessore 1; compaiono nella scheda PDF.</p>`;
     $("#dz-sheet").hidden=false;
   }
-  function closeSheet(silent){ if(!sheetIng&&silent) return; sheetIng=null; $("#dz-sheet").hidden=true; }
+  function closeSheet(){ sheetIng=null; $("#dz-sheet").hidden=true; }
 
   // ===================== SCHEDA PDF =====================
   let downloadsCap=null;
@@ -1710,20 +923,21 @@
     return {status:"saved"};
   }
   const pdfText = s => String(s).replace(/[–—]/g,"-").replace(/[“”]/g,'"').replace(/[’]/g,"'");
-  async function makePDF(teamId){
+  function slugify(s){ return (s||"").toString().toLowerCase().trim().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"torta"; }
+  async function makePDF(){
     if(!window.jspdf){ toast("La libreria PDF non è stata caricata. Controlla la connessione e ricarica."); return; }
-    const t=teams[teamId], r=t.recipe, st=recipeStats(r), tf=tierFactor(r);
+    const r=cake.recipe, st=recipeStats(r), tf=tierFactor(r);
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), W=210, H=297, M=16;
     const date=new Date().toLocaleDateString("it-IT",{day:"2-digit",month:"long",year:"numeric"});
     doc.setFillColor(29,5,61); doc.rect(0,0,W,24,"F"); doc.setFillColor(255,228,0); doc.circle(M+2,12,2,"F");
-    doc.setFont("helvetica","bold"); doc.setFontSize(15); doc.setTextColor(255,255,255); doc.text("Zeelandia Cake Contest",M+7,13.8);
+    doc.setFont("helvetica","bold"); doc.setFontSize(15); doc.setTextColor(255,255,255); doc.text("Zeelandia Cake Designer",M+7,13.8);
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(203,185,232); doc.text("Scheda progetto  ·  "+date,W-M,13.8,{align:"right"});
     doc.setFillColor(255,228,0); doc.rect(0,24,W,1.6,"F");
-    const title=pdfText((t.cakeName||"").trim()||"Torta senza nome");
+    const title=pdfText((cake.name||"").trim()||"Torta senza nome");
     let fs=26; doc.setFont("helvetica","bold"); doc.setFontSize(fs); while(doc.getTextWidth(title)>W-2*M&&fs>12){ fs--; doc.setFontSize(fs); }
     doc.setTextColor(29,5,61); doc.text(title,M,39);
     doc.setFont("helvetica","normal"); doc.setFontSize(10.5); doc.setTextColor(110,100,128);
-    doc.text(pdfText(`${teamName(teamId)}  ·  Turno ${teamTurno(teamId)}  ·  ${r.shape==="square"?"quadrata":"rotonda"}, ${r.tiers||1} ${(r.tiers||1)===1?"piano":"piani"}  ·  ${st.layers} strati, ${st.pieces} decorazioni`),M,46);
+    doc.text(pdfText(`${r.shape==="square"?"Quadrata":"Rotonda"}, ${r.tiers||1} ${(r.tiers||1)===1?"piano":"piani"}  ·  ${st.layers} strati, ${st.pieces} decorazioni`),M,46);
     const off=document.createElement("canvas"); off.width=off.height=1500; drawCake(off.getContext("2d"),1500,r,{bg:"#FFFFFF"});
     const IS=104; doc.addImage(off.toDataURL("image/jpeg",.92),"JPEG",(W-IS)/2,50,IS,IS);
     let y=165;
@@ -1749,10 +963,9 @@
     if(y+RH>H-M-6){ doc.addPage(); y=M+4; }
     doc.setFont("helvetica","bold"); doc.setFontSize(10.5); doc.setTextColor(29,5,61); doc.text("Totale stimato",M+14,y+1.5); doc.text(grams>0?fmtNum(grams,0)+" g":"-",W-M,y+1.5,{align:"right"});
     doc.setDrawColor(29,5,61); doc.setLineWidth(.6); doc.line(M,H-M-7,W-M,H-M-7);
-    doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(180,172,196); doc.text("Zeelandia Cake Contest",M,H-M-2);
-    doc.setFont("helvetica","normal"); doc.setTextColor(110,100,128); doc.text(pdfText(`${teamName(teamId)}  ·  ${title}`),W-M,H-M-2,{align:"right"});
-    const slug=slugify(`${teamName(teamId)} ${title}`).replace(/_/g,"-");
-    try{ await saveBlob(doc.output("blob"),`torta-${slug}.pdf`); toast("Scheda salvata."); }
+    doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(180,172,196); doc.text("Zeelandia Cake Designer",M,H-M-2);
+    doc.setFont("helvetica","normal"); doc.setTextColor(110,100,128); doc.text(title,W-M,H-M-2,{align:"right"});
+    try{ await saveBlob(doc.output("blob"),`torta-${slugify(title)}.pdf`); toast("Scheda salvata."); }
     catch(err){ toast(err&&err.code==="declined"?"Salvataggio annullato.":"Impossibile salvare il PDF."); }
   }
 
@@ -1760,32 +973,20 @@
   document.addEventListener("click", e=>{
     if(e.target.id==="dz-sheet"){ closeSheet(); return; }
     const b=e.target.closest("[data-act]"); if(!b) return;
-    const act=b.dataset.act, id=b.dataset.id;
+    const act=b.dataset.act, id=b.dataset.id, r=cake.recipe;
     switch(act){
-      case "goto": view=b.dataset.v; render(); return;
-      case "back": view="organizer"; render(); return;
-      case "start-t": orgStartTurno(+b.dataset.n); return;
-      case "pause-t": orgTogglePause(); return;
-      case "reset-t": orgResetTurno(); return;
-      case "open-team": openTeam(id); return;
-      case "rm-ing": removeIngredient(b.dataset.cat,id); return;
-      case "add-ing": { const inp=document.getElementById("add-"+b.dataset.cat); addIngredient(b.dataset.cat,inp&&inp.value); return; }
       case "dz-tab": activeCat=b.dataset.v; refreshDesigner(); animateTilesEnter(); return;
       case "dz-pick": useAs(id,ITEM[id].role); return;
       case "dz-adjust": openSheet(id); return;
       case "sheet-use": { const ing=sheetIng; closeSheet(); useAs(ing,b.dataset.role); return; }
       case "sheet-close": closeSheet(); return;
-      case "dz-shape": if(isLocked()) return; curTeam().recipe.shape=b.dataset.v; refreshDesigner(); return;
-      case "dz-tiers": if(isLocked()) return; curTeam().recipe.tiers=+b.dataset.v; refreshDesigner(); return;
-      case "dz-shuffle": { const r=curTeam().recipe; r.decos.forEach(d=>d.seed=newSeed()); r.layers.forEach(l=>l.seed=newSeed()); const s=$(".dz-stage"); if(s){ s.classList.remove("bounce"); void s.offsetWidth; s.classList.add("bounce"); } cakeAnim=r.decos.length?{deco:r.decos[r.decos.length-1].id,from:0}:null; drawTeamCake(); return; }
+      case "dz-shape": r.shape=b.dataset.v; refreshDesigner(); return;
+      case "dz-tiers": r.tiers=+b.dataset.v; refreshDesigner(); return;
+      case "dz-shuffle": { r.decos.forEach(d=>d.seed=newSeed()); r.layers.forEach(l=>l.seed=newSeed()); const s=$(".dz-stage"); if(s){ s.classList.remove("bounce"); void s.offsetWidth; s.classList.add("bounce"); } cakeAnim=r.decos.length?{deco:r.decos[r.decos.length-1].id,from:0}:null; drawCakeCanvas(); return; }
       case "dz-clear": clearAll(b); return;
-      case "dz-pdf": makePDF(selectedTeam); return;
-      case "dz-confirm": confirmCake(); return;
-      case "dz-edit": curTeam().status="attesa"; render(); return;
-      case "dz-rm-coat": if(isLocked()) return; curTeam().recipe.coat=null; refreshDesigner(); return;
+      case "dz-pdf": makePDF(); return;
+      case "dz-rm-coat": r.coat=null; refreshDesigner(); return;
     }
-    if(isLocked()) return;
-    const r=curTeam().recipe;
     const li=b.closest("[data-layer]"), ld=b.closest("[data-deco]");
     if(li){
       const L=r.layers.find(l=>l.id===li.dataset.layer); if(!L) return;
@@ -1805,36 +1006,19 @@
   });
   document.addEventListener("input", e=>{
     const t=e.target;
-    if(t.id==="team-name"){ curTeam().name=t.value.trim(); const h=$("#dz-title"); if(h) h.textContent=teamName(selectedTeam); return; }
-    if(t.id==="cake-name"){ curTeam().cakeName=t.value; return; }
-    if(t.id==="rules-input"){ RULES_TEXT=t.value; return; }
-    if(t.dataset.teamname){ teams[t.dataset.teamname].name=t.value.trim(); return; }
-    if(sheetIng&&t.dataset.field==="size"){ metaOf(sheetIng).size=+t.value; t.nextElementSibling.textContent=t.value+"%"; drawTeamCake(); return; }
+    if(t.id==="cake-name"){ cake.name=t.value; $("#dz-title").textContent=cakeTitle(); return; }
+    if(sheetIng&&t.dataset.field==="size"){ metaOf(sheetIng).size=+t.value; t.nextElementSibling.textContent=t.value+"%"; drawCakeCanvas(); return; }
     if(sheetIng&&/^w(Layer|Coat|Deco)$/.test(t.dataset.field||"")){ metaOf(sheetIng)[t.dataset.field]=Math.max(0,parseFloat(t.value)||0); return; }
   });
   document.addEventListener("change", e=>{
     const t=e.target;
-    if(t.dataset.setup){ applySetup(t.dataset.setup,t.value); return; }
-    if(view==="team"&&!isLocked()&&(t.dataset.field==="thick"||t.dataset.field==="count")){
-      const r=curTeam().recipe, li=t.closest("[data-layer]"), ld=t.closest("[data-deco]");
-      if(li){ const L=r.layers.find(l=>l.id===li.dataset.layer); if(L) L.thick=Math.max(1,Math.min(6,parseInt(t.value,10)||1)); }
-      if(ld){ const d=r.decos.find(x=>x.id===ld.dataset.deco); if(d) d.count=Math.max(1,Math.min(99,parseInt(t.value,10)||1)); }
-      refreshDesigner();
-    }
+    if(t.dataset.field!=="thick"&&t.dataset.field!=="count") return;
+    const r=cake.recipe, li=t.closest("[data-layer]"), ld=t.closest("[data-deco]");
+    if(li){ const L=r.layers.find(l=>l.id===li.dataset.layer); if(L) L.thick=Math.max(1,Math.min(6,parseInt(t.value,10)||1)); }
+    if(ld){ const d=r.decos.find(x=>x.id===ld.dataset.deco); if(d) d.count=Math.max(1,Math.min(99,parseInt(t.value,10)||1)); }
+    refreshDesigner();
   });
-  document.addEventListener("keydown", e=>{
-    if(e.key==="Escape"&&sheetIng){ closeSheet(); return; }
-    if(e.key==="Enter"&&e.target.dataset&&e.target.dataset.catInput){ addIngredient(e.target.dataset.catInput,e.target.value); }
-  });
-
-  // ===================== TICKER =====================
-  setInterval(()=>{
-    if(!timer.running) return;
-    const rem=remainingSeconds(), n=timer.currentTurno;
-    if(GAME.alertMinutes>0&&timer.total>GAME.alertMinutes*60&&rem<=GAME.alertMinutes*60&&rem>0&&!alertShown[n]){ alertShown[n]=true; showAlertPopup(); }
-    if(rem<=0){ timer.running=false; timer.startedAt=null; timer.duration=0; if(!alarmPlayed[n]){ alarmPlayed[n]=true; showFinishPopup(); } }
-    if(view==="organizer") updateOrganizerLive(); else if(view==="team") updateTeamLive();
-  },1000);
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape"&&sheetIng) closeSheet(); });
 
   render();
 })();
