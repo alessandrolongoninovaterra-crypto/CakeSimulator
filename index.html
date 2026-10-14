@@ -562,6 +562,7 @@
   const ease = t => 1-Math.pow(1-Math.max(0,Math.min(1,t)),3);
 
   function drawCake(ctx,S,r,opts={}){
+    if(r.shape==="loaf"||r.shape==="muffin") return drawBaked(ctx,S,r,opts);
     const an=opts.anim||null, u=S/400, cx=S/2, sq=r.shape==="square";
     ctx.clearRect(0,0,S,S);
     if(opts.bg){ ctx.fillStyle=opts.bg; ctx.fillRect(0,0,S,S); }
@@ -575,13 +576,8 @@
     const U=layers.reduce((a,l)=>a+l.thick*grow(l),0);
     let hsum=0; for(let i=0;i<T;i++) hsum+=HS[i];
     const uh=U?Math.min(S*.052,(S*.5)/(U*hsum)):0;
-    // piatto
-    const yPlate=S*.86, prx=rx0+S*.06, pry=sq?prx*.2:prx*.24;
-    ctx.save(); ctx.fillStyle='rgba(29,5,61,.18)'; ctx.filter='blur('+(S*.012)+'px)'; ctx.beginPath(); ctx.ellipse(cx,yPlate+pry*.5,prx*1.02,pry*1.05,0,0,7); ctx.fill(); ctx.restore();
-    const pg=ctx.createLinearGradient(0,yPlate-pry,0,yPlate+pry); pg.addColorStop(0,'#FFFFFF'); pg.addColorStop(1,'#D9D2E4');
-    ctx.fillStyle='#C9C0D8'; ctx.beginPath(); ctx.ellipse(cx,yPlate+S*.012,prx,pry,0,0,7); ctx.fill();
-    ctx.fillStyle=pg; ctx.beginPath(); ctx.ellipse(cx,yPlate,prx,pry,0,0,7); ctx.fill();
-    ctx.strokeStyle='rgba(29,5,61,.12)'; ctx.lineWidth=u; ctx.stroke();
+    const yPlate=S*.86, prx=rx0+S*.06;
+    drawPlate(ctx,S,cx,yPlate,prx,sq?prx*.2:prx*.24);
     if(!layers.length){
       const rx=rx0, ry=sq?0:rx*.24, yb=yPlate, yt=yb-S*.2;
       ctx.save(); ctx.setLineDash([u*5,u*4]); ctx.lineWidth=u*1.6; ctx.strokeStyle='rgba(29,5,61,.28)';
@@ -635,19 +631,32 @@
       top={capY,crx,cry};
       yb = sq ? capY - crx*.2 : capY;
     }
-    // decorazioni sulla cima
+    drawDecos(ctx,S,r,an,top.crx*2,(rnd,dia,i,art,t)=>{
+      if(art==="plaque"&&i===0&&t===0) return {x:cx, y:sq?top.capY-top.crx*.2:top.capY};
+      if(sq){ const v=rnd(), half=(top.crx-v*top.crx*.16)*.86-dia*.3; return {x:cx+(rnd()*2-1)*Math.max(0,half), y:top.capY-v*top.crx*.36-top.crx*.02}; }
+      const a=rnd()*6.283, dd=Math.sqrt(rnd()); return {x:cx+Math.cos(a)*dd*Math.max(0,top.crx*.86-dia*.3), y:top.capY+Math.sin(a)*dd*top.cry*.8};
+    });
+  }
+
+  function drawPlate(ctx,S,cx,yPlate,prx,pry){
+    const u=S/400;
+    ctx.save(); ctx.fillStyle='rgba(29,5,61,.18)'; ctx.filter='blur('+(S*.012)+'px)'; ctx.beginPath(); ctx.ellipse(cx,yPlate+pry*.5,prx*1.02,pry*1.05,0,0,7); ctx.fill(); ctx.restore();
+    const pg=ctx.createLinearGradient(0,yPlate-pry,0,yPlate+pry); pg.addColorStop(0,'#FFFFFF'); pg.addColorStop(1,'#D9D2E4');
+    ctx.fillStyle='#C9C0D8'; ctx.beginPath(); ctx.ellipse(cx,yPlate+S*.012,prx,pry,0,0,7); ctx.fill();
+    ctx.fillStyle=pg; ctx.beginPath(); ctx.ellipse(cx,yPlate,prx,pry,0,0,7); ctx.fill();
+    ctx.strokeStyle='rgba(29,5,61,.12)'; ctx.lineWidth=u; ctx.stroke();
+  }
+  // decorazioni: place(rnd, diametro, indice, tipo, tentativo) → {x,y} sulla superficie superiore
+  function drawDecos(ctx,S,r,an,ref,place){
     const pts=[];
     r.decos.filter(d=>ITEM[d.ingId]).forEach(d=>{
       const it=ITEM[d.ingId], art=kindFor(it,"deco"), def=DECO_DEF[art]||DECO_DEF.chunk, m=metaOf(d.ingId);
-      const img=getDecoArt(art,it.col), dia=top.crx*2*m.size/100, rnd=rng(d.seed), mine=[];
+      const img=getDecoArt(art,it.col), dia=ref*m.size/100, rnd=rng(d.seed), mine=[];
       for(let i=0;i<d.count;i++){
         let best=null;
         for(let t=0;t<30;t++){
-          let x,y;
-          if(art==="plaque"&&i===0&&t===0){ x=cx; y=sq?top.capY-top.crx*.2:top.capY; }
-          else if(sq){ const v=rnd(), half=(top.crx-v*top.crx*.16)*.86-dia*.3; x=cx+(rnd()*2-1)*Math.max(0,half); y=top.capY-v*top.crx*.36-top.crx*.02; }
-          else { const a=rnd()*6.283, dd=Math.sqrt(rnd()); x=cx+Math.cos(a)*dd*Math.max(0,top.crx*.86-dia*.3); y=top.capY+Math.sin(a)*dd*top.cry*.8; }
-          if(t===29||mine.every(o=>Math.hypot(o.x-x,(o.y-y)*2.2)>=dia*.7*(1-t/40))){ best={x,y}; break; }
+          const c=place(rnd,dia,i,art,t);
+          if(t===29||mine.every(o=>Math.hypot(o.x-c.x,(o.y-c.y)*2.2)>=dia*.7*(1-t/40))){ best=c; break; }
         }
         const p={x:best.x,y:best.y,img,k:dia*(.9+rnd()*.2)/256,up:!!def[2],rot:def[2]?(rnd()-.5)*.25:rnd()*6.283,alpha:1,lift:0};
         if(an&&an.deco===d.id&&i>=(an.from||0)){
@@ -663,6 +672,99 @@
       if(p.up){ ctx.rotate(p.rot); ctx.drawImage(p.img,-128*p.k,-236*p.k,256*p.k,256*p.k); }
       else { ctx.scale(1,.62); ctx.rotate(p.rot); ctx.drawImage(p.img,-128*p.k,-128*p.k,256*p.k,256*p.k); }
       ctx.restore();
+    });
+  }
+
+  // ---- plumcake e muffin: vista frontale in sezione, altezza fissa, strati in proporzione ----
+  function bakedGeom(S,muf){
+    const cx=S/2, yPlate=S*.86;
+    if(muf){ const bw=S*.16, tw=S*.205, dw=S*.27, ch=S*.25, dh=S*.21, yb=yPlate-S*.004, yc=yb-ch;
+      return {muf, cx, yPlate, yb, yc, half:dw, top:yc-dh, Htot:ch+dh, dh, prx:S*.25,
+        sil(g){ g.beginPath(); g.moveTo(cx-bw,yb); g.lineTo(cx-tw,yc); g.quadraticCurveTo(cx-dw*1.03,yc+S*.006,cx-dw,yc-dh*.16);
+          g.bezierCurveTo(cx-dw*1.04,yc-dh*.86,cx-dw*.55,yc-dh*1.02,cx,yc-dh); g.bezierCurveTo(cx+dw*.55,yc-dh*1.02,cx+dw*1.04,yc-dh*.86,cx+dw,yc-dh*.16);
+          g.quadraticCurveTo(cx+dw*1.03,yc+S*.006,cx+tw,yc); g.lineTo(cx+bw,yb); g.closePath(); },
+        cup(g){ g.beginPath(); g.moveTo(cx-bw,yb); g.lineTo(cx-tw,yc); g.lineTo(cx+tw,yc); g.lineTo(cx+bw,yb); g.closePath(); },
+        topY:x=>yc-dh*Math.sqrt(Math.max(0,1-Math.pow((x-cx)/(dw*.98),2))), capBottom:yc-dh*.14, bw, tw };
+    }
+    const rx=S*.4, bw=rx*.93, H=S*.27, dh=S*.07, yb=yPlate, yt=yb-H;
+    return {muf, cx, yPlate, yb, yc:yt, half:rx, top:yt-dh, Htot:H+dh, dh, H, prx:S*.46,
+      sil(g){ g.beginPath(); g.moveTo(cx-bw,yb); g.lineTo(cx-rx,yt); g.bezierCurveTo(cx-rx,yt-dh*.78,cx-rx*.45,yt-dh,cx,yt-dh);
+        g.bezierCurveTo(cx+rx*.45,yt-dh,cx+rx,yt-dh*.78,cx+rx,yt); g.lineTo(cx+bw,yb); g.closePath(); },
+      topY:x=>yt-dh*Math.pow(Math.max(0,1-Math.pow(Math.abs(x-cx)/rx,2.4)),.55), capBottom:yt+S*.006 };
+  }
+  function drawBaked(ctx,S,r,opts){
+    const an=opts.anim||null, u=S/400, muf=r.shape==="muffin", G=bakedGeom(S,muf), cx=G.cx;
+    ctx.clearRect(0,0,S,S);
+    if(opts.bg){ ctx.fillStyle=opts.bg; ctx.fillRect(0,0,S,S); }
+    drawPlate(ctx,S,cx,G.yPlate,G.prx,G.prx*.2);
+    const layers=r.layers.filter(l=>ITEM[l.ingId]);
+    if(!layers.length){
+      ctx.save(); ctx.setLineDash([u*5,u*4]); ctx.lineWidth=u*1.6; ctx.strokeStyle='rgba(29,5,61,.28)'; G.sil(ctx); ctx.stroke(); ctx.restore();
+      ctx.fillStyle='rgba(29,5,61,.45)'; ctx.font=`700 ${u*11}px Inter,system-ui,sans-serif`; ctx.textAlign='center'; ctx.fillText('Scegli un impasto per iniziare',cx,G.yb-G.Htot*.42);
+      return;
+    }
+    const coat=r.coat&&ITEM[r.coat]?ITEM[r.coat]:null, ck=coat?kindFor(coat,"coat"):null;
+    const coatA=coat?(an&&an.coat!=null?ease(an.coat):1):0;
+    const grow=l=>an&&an.layer===l.id?ease(an.t):1;
+    const U=layers.reduce((a,l)=>a+l.thick*grow(l),0)||1;
+    // strati
+    ctx.save(); G.sil(ctx); ctx.clip();
+    let y=G.yb;
+    layers.forEach((l,k)=>{
+      const it=ITEM[l.ingId], h=l.thick*grow(l)/U*G.Htot, last=k===layers.length-1;
+      if(h<=.2&&!last) return;
+      fillTex(ctx,kindFor(it,"layer"),it.col,cx-G.half-2,last?G.top-u*4:y-h,cx+G.half+2,y+1,l.seed,u); y-=h;
+    });
+    const sh=ctx.createLinearGradient(cx-G.half,0,cx+G.half,0);
+    sh.addColorStop(0,'rgba(0,0,0,.18)'); sh.addColorStop(.3,'rgba(255,255,255,.06)'); sh.addColorStop(.7,'rgba(0,0,0,.02)'); sh.addColorStop(1,'rgba(0,0,0,.22)');
+    ctx.fillStyle=sh; ctx.fillRect(0,0,S,S);
+    // crosta cotta sulla cupola (senza copertura piena)
+    const topIt=ITEM[layers[layers.length-1].ingId], crust=tone(topIt.col,-.35,.85);
+    G.sil(ctx); ctx.lineWidth=u*5; ctx.strokeStyle=crust; ctx.stroke();
+    if(!muf){ const rr=rng(layers[0].seed); ctx.lineCap='round';
+      ctx.beginPath(); for(let x=cx-G.half*.55;x<=cx+G.half*.55;x+=u*4){ const yy=G.topY(x)+u*3+Math.sin(x/(u*7))*u*1.2+(rr()-.5)*u; x===cx-G.half*.55?ctx.moveTo(x,yy):ctx.lineTo(x,yy); }
+      ctx.lineWidth=u*3.4; ctx.strokeStyle=tone(topIt.col,-.45,.9); ctx.stroke(); ctx.lineWidth=u*1.2; ctx.strokeStyle=tone(topIt.col,.35,.9); ctx.stroke(); }
+    ctx.restore();
+    // pirottino di carta del muffin
+    if(muf){
+      ctx.save(); G.cup(ctx); ctx.clip();
+      const n=16, yb=G.yb, yc=G.yc;
+      for(let k=0;k<n;k++){
+        const a=k/n, b=(k+1)/n, xb0=cx-G.bw+a*G.bw*2, xb1=cx-G.bw+b*G.bw*2, xt0=cx-G.tw+a*G.tw*2, xt1=cx-G.tw+b*G.tw*2;
+        ctx.beginPath(); ctx.moveTo(xb0,yb); ctx.lineTo(xt0,yc); ctx.lineTo(xt1,yc); ctx.lineTo(xb1,yb); ctx.closePath();
+        ctx.fillStyle=k%2?'rgba(246,241,250,.5)':'rgba(246,241,250,.9)'; ctx.fill();
+        ctx.strokeStyle='rgba(120,90,170,.35)'; ctx.lineWidth=u*.8; ctx.stroke();
+      }
+      const lg=ctx.createLinearGradient(cx-G.tw,0,cx+G.tw,0); lg.addColorStop(0,'rgba(29,5,61,.18)'); lg.addColorStop(.4,'rgba(255,255,255,.1)'); lg.addColorStop(1,'rgba(29,5,61,.22)');
+      ctx.fillStyle=lg; ctx.fillRect(0,0,S,S); ctx.restore();
+      ctx.strokeStyle='rgba(120,90,170,.6)'; ctx.lineWidth=u*1.2; G.cup(ctx); ctx.stroke();
+    }
+    // copertura sulla cupola, con bordo ondulato
+    if(coat){
+      const capPath=()=>{ ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(S,0); ctx.lineTo(S,G.capBottom); for(let x=S;x>=0;x-=u*2) ctx.lineTo(x,G.capBottom+Math.sin(x/(u*9))*u*2.5); ctx.closePath(); };
+      ctx.save(); ctx.globalAlpha=coatA; capPath(); ctx.clip();
+      if(RIM_COATS.has(ck)){
+        const q=ctx.createLinearGradient(0,G.top,0,G.capBottom); q.addColorStop(0,tone(coat.col,.3)); q.addColorStop(1,tone(coat.col,-.08));
+        G.sil(ctx); ctx.fillStyle=q; ctx.lineJoin='round'; ctx.lineWidth=u*9; ctx.strokeStyle=q; ctx.stroke(); ctx.fill();
+        if(ck==="almondglaze"){ const rr=rng(9); ctx.fillStyle=tone(coat.col,-.25,.6); for(let k=0;k<500;k++){ ctx.beginPath(); ctx.arc(cx-G.half+rr()*G.half*2,G.top+rr()*(G.capBottom-G.top),(.3+rr()*.6)*u,0,7); ctx.fill(); } }
+      }
+      if(ck==="gel"){ G.sil(ctx); ctx.fillStyle=tone(coat.col,0,.55); ctx.lineWidth=u*3; ctx.strokeStyle=ctx.fillStyle; ctx.stroke(); ctx.fill(); }
+      if(ck==="dust"){ G.sil(ctx); ctx.clip(); const rr=rng(7); ctx.fillStyle='rgba(255,255,255,.92)'; for(let k=0;k<700;k++){ const x=cx-G.half+rr()*G.half*2; ctx.beginPath(); ctx.arc(x,G.topY(x)+rr()*G.dh*.5,(.3+rr()*.8)*u,0,7); ctx.fill(); } }
+      if(ck!=="dust"&&ck!=="fondant"&&ck!=="almondglaze"){ ctx.fillStyle='rgba(255,255,255,.45)'; ctx.beginPath(); ctx.ellipse(cx-G.half*.32,G.topY(cx-G.half*.32)+u*5,G.half*.2,u*2.6,-.12,0,7); ctx.fill(); }
+      ctx.restore();
+      if(ck==="glaze"||ck==="choc"||ck==="gel"){
+        const rr=rng(31), w=muf?G.half*.95:G.half, n=Math.round(7+w/(u*7)), dw=u*(ck==="gel"?2.2:3.2), maxL=muf?G.dh*.55:G.H*.4;
+        ctx.save(); ctx.globalAlpha=coatA*(ck==="gel"?.75:1); ctx.fillStyle=ck==="gel"?tone(coat.col,0,.8):coat.col;
+        for(let k=0;k<n;k++){ const x=cx-w+(k+.5)/n*w*2, base=G.capBottom-u*2, len=(rr()*.8+.15)*maxL*coatA;
+          ctx.beginPath(); ctx.moveTo(x-dw*1.6,base); ctx.lineTo(x-dw,base+len-dw); ctx.arc(x,base+len-dw,dw,Math.PI,0,true); ctx.lineTo(x+dw*1.6,base); ctx.closePath(); ctx.fill(); }
+        ctx.restore();
+      }
+    }
+    const lift=coat&&RIM_COATS.has(ck)?u*4:0;
+    drawDecos(ctx,S,r,an,G.half*2,(rnd,dia,i,art,t)=>{
+      if(art==="plaque"&&i===0&&t===0) return {x:cx, y:G.topY(cx)+G.dh*.12-lift};
+      const x=cx+(rnd()*2-1)*Math.max(0,G.half*(muf?.72:.82)-dia*.3);
+      return {x, y:G.topY(x)+rnd()*G.dh*(muf?.22:.3)+u*2-lift};
     });
   }
 
@@ -717,7 +819,11 @@
     return { layers:ls.length, bases:ls.filter(l=>BASE_KINDS.has(kindFor(ITEM[l.ingId],"layer"))).length, decoTypes:ds.length,
       pieces:ds.reduce((a,d)=>a+d.count,0), hasCoat:!!(r.coat&&ITEM[r.coat]) };
   }
-  const tierFactor = r => [1,.49,.23].slice(0,r.tiers||1).reduce((a,b)=>a+b,0);
+  const SHAPES = [["round","● Rotonda"],["square","■ Quadrata"],["loaf","Plumcake"],["muffin","Muffin"]];
+  const SHAPE_NAME = {round:"Rotonda", square:"Quadrata", loaf:"Plumcake", muffin:"Muffin"};
+  const hasTiers = r => r.shape==="round"||r.shape==="square";
+  // pesi riferiti a un piano Ø 24 cm: plumcake ≈ stampo 30 cm, muffin = un pezzo
+  const tierFactor = r => r.shape==="loaf" ? .6 : r.shape==="muffin" ? .08 : [1,.49,.23].slice(0,r.tiers||1).reduce((a,b)=>a+b,0);
   const cakeTitle = () => (cake.name||"").trim() || "Nuova torta";
 
   let toastT=0;
@@ -779,8 +885,8 @@
   }
   function shapeHtml(){
     const r=cake.recipe;
-    return `<span>Forma</span><div class="dz-seg">${[["round","● Rotonda"],["square","■ Quadrata"]].map(([v,l])=>`<button data-act="dz-shape" data-v="${v}" aria-pressed="${r.shape===v}">${l}</button>`).join("")}</div>
-      <span>Piani</span><div class="dz-seg">${[1,2,3].map(n=>`<button data-act="dz-tiers" data-v="${n}" aria-pressed="${(r.tiers||1)===n}">${n}</button>`).join("")}</div>`;
+    return `<span>Forma</span><div class="dz-seg">${SHAPES.map(([v,l])=>`<button data-act="dz-shape" data-v="${v}" aria-pressed="${r.shape===v}">${l}</button>`).join("")}</div>
+      ${hasTiers(r)?`<span>Piani</span><div class="dz-seg">${[1,2,3].map(n=>`<button data-act="dz-tiers" data-v="${n}" aria-pressed="${(r.tiers||1)===n}">${n}</button>`).join("")}</div>`:""}`;
   }
   function footerHtml(){
     const st=recipeStats(cake.recipe);
@@ -908,7 +1014,7 @@
       ${roles.includes("layer")?fld("Peso / strato","wLayer",m.wLayer,"g"):""}
       ${roles.includes("coat")?fld("Peso copertura","wCoat",m.wCoat,"g"):""}
       ${roles.includes("deco")?fld("Peso / pezzo","wDeco",m.wDeco,"g"):""}
-      <p class="pc-settings-note" style="margin:0;">Pesi riferiti a un piano Ø 24 cm e spessore 1; compaiono nella scheda PDF.</p>`;
+      <p class="pc-settings-note" style="margin:0;">Pesi riferiti a una torta Ø 24 cm e spessore 1 (plumcake e muffin in proporzione); compaiono nella scheda PDF.</p>`;
     $("#dz-sheet").hidden=false;
   }
   function closeSheet(){ sheetIng=null; $("#dz-sheet").hidden=true; }
@@ -937,7 +1043,7 @@
     let fs=26; doc.setFont("helvetica","bold"); doc.setFontSize(fs); while(doc.getTextWidth(title)>W-2*M&&fs>12){ fs--; doc.setFontSize(fs); }
     doc.setTextColor(29,5,61); doc.text(title,M,39);
     doc.setFont("helvetica","normal"); doc.setFontSize(10.5); doc.setTextColor(110,100,128);
-    doc.text(pdfText(`${r.shape==="square"?"Quadrata":"Rotonda"}, ${r.tiers||1} ${(r.tiers||1)===1?"piano":"piani"}  ·  ${st.layers} strati, ${st.pieces} decorazioni`),M,46);
+    doc.text(pdfText(`${SHAPE_NAME[r.shape]||"Rotonda"}${hasTiers(r)?`, ${r.tiers||1} ${(r.tiers||1)===1?"piano":"piani"}`:""}  ·  ${st.layers} strati, ${st.pieces} decorazioni`),M,46);
     const off=document.createElement("canvas"); off.width=off.height=1500; drawCake(off.getContext("2d"),1500,r,{bg:"#FFFFFF"});
     const IS=104; doc.addImage(off.toDataURL("image/jpeg",.92),"JPEG",(W-IS)/2,50,IS,IS);
     let y=165;
