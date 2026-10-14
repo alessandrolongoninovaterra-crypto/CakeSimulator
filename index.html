@@ -303,6 +303,7 @@
   .dz-step small{display:none;}
   .dz-roles{display:flex; flex-wrap:wrap; gap:8px;}
   .dz-roles .pc-btn{flex:1 1 auto;}
+  @media (min-width:641px){ .dz-stage canvas{touch-action:none;} } /* trascinamento decorazioni anche su tablet */
 </style>
 </head>
 <body>
@@ -363,7 +364,7 @@
         ["ff_mango","Fruitful Filling Mango","#F4A42A"],["ff_albicocca","Fruitful Filling Albicocca","#EE9A35"],["ff_arancia","Fruitful Filling Arancia polpa","#F28A1E"]]),
       G("Confetture e semilavorati",{},[
         ["fj_albicocca51","Fruitful Jam Albicocca 51%","#E58A26"],["fj_boschi35","Fruitful Jam Frutti di bosco 35%","#6A1D3A"],["frutajam","FrutaJam Albicocca 50%","#E9952F"]]),
-      G("TuttiFrutti",{kind:"fill"},[
+      G("TuttiFrutti",{role:"deco",kind:"chunk",alt:["layer"],lk:"fill"},[
         ["tf_albicocca","Tuttifrutti Albicocca","#EC9A32"],["tf_arancia","Tuttifrutti Arancia","#F08A20"]]),
       G("Frutta candita",{role:"deco",alt:[]},[
         ["amarene","Amarene intere in sciroppo","#7A0C1F","cherry"],["arancio_candito","Arancio macinato candito","#F07E14","cube"],
@@ -635,7 +636,7 @@
       if(art==="plaque"&&i===0&&t===0) return {x:cx, y:sq?top.capY-top.crx*.2:top.capY};
       if(sq){ const v=rnd(), half=(top.crx-v*top.crx*.16)*.86-dia*.3; return {x:cx+(rnd()*2-1)*Math.max(0,half), y:top.capY-v*top.crx*.36-top.crx*.02}; }
       const a=rnd()*6.283, dd=Math.sqrt(rnd()); return {x:cx+Math.cos(a)*dd*Math.max(0,top.crx*.86-dia*.3), y:top.capY+Math.sin(a)*dd*top.cry*.8};
-    });
+    },{x:cx, y:sq?top.capY-top.crx*.2:top.capY},opts.hits);
   }
 
   function drawPlate(ctx,S,cx,yPlate,prx,pry){
@@ -647,7 +648,8 @@
     ctx.strokeStyle='rgba(29,5,61,.12)'; ctx.lineWidth=u; ctx.stroke();
   }
   // decorazioni: place(rnd, diametro, indice, tipo, tentativo) → {x,y} sulla superficie superiore
-  function drawDecos(ctx,S,r,an,ref,place){
+  // d.moved[i] = [dx, dy] relativi a origin e ref: pezzi spostati a mano
+  function drawDecos(ctx,S,r,an,ref,place,origin,hits){
     const pts=[];
     r.decos.filter(d=>ITEM[d.ingId]).forEach(d=>{
       const it=ITEM[d.ingId], art=kindFor(it,"deco"), def=DECO_DEF[art]||DECO_DEF.chunk, m=metaOf(d.ingId);
@@ -658,12 +660,14 @@
           const c=place(rnd,dia,i,art,t);
           if(t===29||mine.every(o=>Math.hypot(o.x-c.x,(o.y-c.y)*2.2)>=dia*.7*(1-t/40))){ best=c; break; }
         }
-        const p={x:best.x,y:best.y,img,k:dia*(.9+rnd()*.2)/256,up:!!def[2],rot:def[2]?(rnd()-.5)*.25:rnd()*6.283,alpha:1,lift:0};
+        mine.push(best); // le collisioni usano sempre le posizioni automatiche, così spostare un pezzo non sposta gli altri
+        const mv=d.moved&&d.moved[i], pos=mv?{x:origin.x+mv[0]*ref, y:origin.y+mv[1]*ref}:best;
+        const p={x:pos.x,y:pos.y,img,k:dia*(.9+rnd()*.2)/256,up:!!def[2],rot:def[2]?(rnd()-.5)*.25:rnd()*6.283,alpha:1,lift:0,id:d.id,i};
         if(an&&an.deco===d.id&&i>=(an.from||0)){
           const n=Math.max(1,d.count-(an.from||0)), dl=Math.min(.55,(i-(an.from||0))/n*.55), q=Math.max(0,Math.min(1,(an.t-dl)/(1-dl))), e=ease(q);
           if(q<=0) continue; p.alpha=e; p.lift=(1-e)*S*.08;
         }
-        mine.push(p); pts.push(p);
+        pts.push(p);
       }
     });
     pts.sort((a,b)=>a.y-b.y).forEach(p=>{
@@ -672,6 +676,8 @@
       if(p.up){ ctx.rotate(p.rot); ctx.drawImage(p.img,-128*p.k,-236*p.k,256*p.k,256*p.k); }
       else { ctx.scale(1,.62); ctx.rotate(p.rot); ctx.drawImage(p.img,-128*p.k,-128*p.k,256*p.k,256*p.k); }
       ctx.restore();
+      if(hits){ const hw=Math.max(S*.014,100*p.k), hh=Math.max(S*.014,p.up?0:62*p.k);
+        hits.push({id:p.id, i:p.i, x:p.x, y:p.y, x0:p.x-hw, x1:p.x+hw, y0:p.up?p.y-220*p.k:p.y-hh, y1:p.y+hh, ref, ox:origin.x, oy:origin.y}); }
     });
   }
 
@@ -765,7 +771,7 @@
       if(art==="plaque"&&i===0&&t===0) return {x:cx, y:G.topY(cx)+G.dh*.12-lift};
       const x=cx+(rnd()*2-1)*Math.max(0,G.half*(muf?.72:.82)-dia*.3);
       return {x, y:G.topY(x)+rnd()*G.dh*(muf?.22:.3)+u*2-lift};
-    });
+    },{x:cx, y:G.topY(cx)},opts.hits);
   }
 
   // ---- miniature dei prodotti ----
@@ -857,7 +863,7 @@
     const st=recipeStats(cake.recipe);
     if(activeCat==="impasti") return ["","Ogni tocco aggiunge uno strato in cima. Alterna impasti e farciture."];
     if(activeCat==="coperture") return ["","Scegli una copertura; toccala di nuovo per toglierla."];
-    if(activeCat==="decorazioni") return [st.decoTypes>=MAX_DECOS?"warn":"",`Tocca per mettere decorazioni sulla torta, di nuovo per aggiungerne. Max ${MAX_DECOS} tipi.`];
+    if(activeCat==="decorazioni") return [st.decoTypes>=MAX_DECOS?"warn":"",`Tocca per mettere decorazioni, di nuovo per aggiungerne (max ${MAX_DECOS} tipi). Nel disegno trascinale per spostarle; ⟳ le rimette a caso.`];
     if(st.layers>=MAX_LAYERS) return ["warn",`Hai raggiunto ${MAX_LAYERS} strati. Togline uno per aggiungerne altri.`];
     return ["","Tocca un prodotto per usarlo. Con ⚙ in alto a sinistra puoi usarlo in un altro modo (strato, copertura, decorazione)."];
   }
@@ -869,7 +875,7 @@
         <span class="dz-thumb sm">${thumbImg(d.ingId)}</span>
         <div class="dz-lname">${escapeHtml(nameOf(d.ingId))}<small>Decorazione · pezzi</small></div>
         <div class="dz-step"><button data-act="dz-dec" aria-label="Uno in meno">−</button><input type="number" inputmode="numeric" min="1" max="99" value="${d.count}" data-field="count" aria-label="Pezzi di ${escapeHtml(nameOf(d.ingId))}"><button data-act="dz-inc" aria-label="Uno in più">+</button></div>
-        <button class="dz-ibtn" data-act="dz-reshuffle" title="Mescola posizioni" aria-label="Mescola posizioni">⟳</button>
+        <button class="dz-ibtn" data-act="dz-reshuffle" title="Rimetti a caso (annulla gli spostamenti)" aria-label="Rimetti a caso">⟳</button>
         <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(nameOf(d.ingId))}">×</button>
       </li>`).join("");
     const ls=r.layers.filter(l=>ITEM[l.ingId]);
@@ -927,17 +933,17 @@
     const [nc,nt]=noteHtml(); const n=$("#dz-note"); n.className="dz-note "+nc; n.textContent=nt;
     drawCakeCanvas(); scheduleFit();
   }
-  let lastPicked=null, newLayerId=null, cakeAnim=null, animRaf=0;
+  let lastPicked=null, newLayerId=null, cakeAnim=null, animRaf=0, decoHits=[];
   function drawCakeCanvas(){
     const cv=$("#dz-cv"); if(!cv) return;
     const ctx=cv.getContext("2d");
-    if(!cakeAnim||window.matchMedia("(prefers-reduced-motion:reduce)").matches){ cakeAnim=null; drawCake(ctx,cv.width,cake.recipe); return; }
+    if(!cakeAnim||window.matchMedia("(prefers-reduced-motion:reduce)").matches){ cakeAnim=null; const hits=[]; drawCake(ctx,cv.width,cake.recipe,{hits}); decoHits=hits; return; }
     cancelAnimationFrame(animRaf);
     const a=cakeAnim, t0=performance.now(), dur=a.coat!=null?600:650;
     const step=now=>{
       const t=Math.min(1,(now-t0)/dur);
       if(!$("#dz-cv")) return;
-      drawCake(ctx,cv.width,cake.recipe,t<1?{anim:{layer:a.layer,deco:a.deco,from:a.from||0,t,coat:a.coat!=null?t:null}}:{});
+      const hits=[]; drawCake(ctx,cv.width,cake.recipe,t<1?{anim:{layer:a.layer,deco:a.deco,from:a.from||0,t,coat:a.coat!=null?t:null}}:{hits}); if(t>=1) decoHits=hits;
       if(t<1) animRaf=requestAnimationFrame(step); else cakeAnim=null;
     };
     animRaf=requestAnimationFrame(step);
@@ -1088,7 +1094,7 @@
       case "sheet-close": closeSheet(); return;
       case "dz-shape": r.shape=b.dataset.v; refreshDesigner(); return;
       case "dz-tiers": r.tiers=+b.dataset.v; refreshDesigner(); return;
-      case "dz-shuffle": { r.decos.forEach(d=>d.seed=newSeed()); r.layers.forEach(l=>l.seed=newSeed()); const s=$(".dz-stage"); if(s){ s.classList.remove("bounce"); void s.offsetWidth; s.classList.add("bounce"); } cakeAnim=r.decos.length?{deco:r.decos[r.decos.length-1].id,from:0}:null; drawCakeCanvas(); return; }
+      case "dz-shuffle": { r.decos.forEach(d=>{ d.seed=newSeed(); delete d.moved; }); r.layers.forEach(l=>l.seed=newSeed()); const s=$(".dz-stage"); if(s){ s.classList.remove("bounce"); void s.offsetWidth; s.classList.add("bounce"); } cakeAnim=r.decos.length?{deco:r.decos[r.decos.length-1].id,from:0}:null; drawCakeCanvas(); return; }
       case "dz-clear": clearAll(b); return;
       case "dz-pdf": makePDF(); return;
       case "dz-rm-coat": r.coat=null; refreshDesigner(); return;
@@ -1105,7 +1111,7 @@
       const d=r.decos.find(x=>x.id===ld.dataset.deco); if(!d) return;
       if(act==="dz-inc"){ const from=d.count; d.count=Math.min(99,d.count+1); cakeAnim={deco:d.id,from}; }
       else if(act==="dz-dec") d.count=Math.max(1,d.count-1);
-      else if(act==="dz-reshuffle"){ d.seed=newSeed(); cakeAnim={deco:d.id,from:0}; }
+      else if(act==="dz-reshuffle"){ d.seed=newSeed(); delete d.moved; cakeAnim={deco:d.id,from:0}; }
       else if(act==="dz-rm") r.decos=r.decos.filter(x=>x!==d);
       refreshDesigner();
     }
@@ -1125,6 +1131,32 @@
     refreshDesigner();
   });
   document.addEventListener("keydown", e=>{ if(e.key==="Escape"&&sheetIng) closeSheet(); });
+
+  // ---- trascina le decorazioni nel disegno ----
+  let drag=null, dragRaf=0;
+  function canvasPoint(cv,e){
+    const b=cv.getBoundingClientRect(), sc=Math.min(b.width/cv.width,b.height/cv.height);
+    return { x:(e.clientX-b.left-(b.width-cv.width*sc)/2)/sc, y:(e.clientY-b.top-(b.height-cv.height*sc)/2)/sc };
+  }
+  function hitDeco(pt){ for(let k=decoHits.length-1;k>=0;k--){ const h=decoHits[k]; if(pt.x>=h.x0&&pt.x<=h.x1&&pt.y>=h.y0&&pt.y<=h.y1) return h; } return null; }
+  document.addEventListener("pointerdown", e=>{
+    const cv=e.target.id==="dz-cv"?e.target:null; if(!cv||e.button>0) return;
+    const pt=canvasPoint(cv,e), h=hitDeco(pt); if(!h) return;
+    e.preventDefault(); cv.setPointerCapture(e.pointerId);
+    cancelAnimationFrame(animRaf); cakeAnim=null;
+    drag={id:h.id, i:h.i, dx:pt.x-h.x, dy:pt.y-h.y, ref:h.ref, ox:h.ox, oy:h.oy};
+    cv.style.cursor="grabbing";
+  });
+  document.addEventListener("pointermove", e=>{
+    const cv=$("#dz-cv"); if(!cv) return;
+    if(!drag){ if(e.target===cv) cv.style.cursor=hitDeco(canvasPoint(cv,e))?"grab":""; return; }
+    const d=cake.recipe.decos.find(x=>x.id===drag.id); if(!d){ drag=null; return; }
+    const pt=canvasPoint(cv,e), x=Math.max(0,Math.min(cv.width,pt.x-drag.dx)), y=Math.max(0,Math.min(cv.height,pt.y-drag.dy));
+    (d.moved||(d.moved={}))[drag.i]=[(x-drag.ox)/drag.ref,(y-drag.oy)/drag.ref];
+    if(!dragRaf) dragRaf=requestAnimationFrame(()=>{ dragRaf=0; drawCakeCanvas(); });
+  });
+  const endDrag=()=>{ if(!drag) return; drag=null; const cv=$("#dz-cv"); if(cv) cv.style.cursor="grab"; };
+  document.addEventListener("pointerup",endDrag); document.addEventListener("pointercancel",endDrag);
 
   render();
 })();
