@@ -575,7 +575,7 @@
     const grow=l=>an&&an.layer===l.id?ease(an.t):1;
     const U=layers.reduce((a,l)=>a+l.thick*grow(l),0);
     let hsum=0; for(let i=0;i<T;i++) hsum+=HS[i];
-    const uh=U?Math.min(S*.052,(S*.5)/(U*hsum)):0;
+    const uh=U?Math.min(S*.026,(S*.25)/(U*hsum)):0; // altezza per unità di spessore (dimezzata)
     const yPlate=S*.86, prx=rx0+S*.06;
     drawPlate(ctx,S,cx,yPlate,prx,sq?prx*.2:prx*.24);
     if(!layers.length){
