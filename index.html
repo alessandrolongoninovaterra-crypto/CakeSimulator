@@ -344,7 +344,7 @@
       G("04 Paste Montate",{},[
         ["choco_torte","Choco Torte","#5A3322"],["margherita","Margherita","#F5D47E"],["quick_mix","Quick Mix","#F4DC98"],["sacher","Sacher","#3D2015"]]),
       G("03 Linea Pasticceria Tradizionale",{},[
-        ["frolla","Frolla","#E2AE62","biscuit"],["sfoglia","Sfoglia","#E8BF7A","puff"],["top_bigne","Top Bigné","#D99A50","choux"]]),
+        ["frolla","Frolla","#E2AE62","biscuit"],["sfoglia","Sfoglia","#E8BF7A","puff"]]),
     ]],
     ["coperture","Coperture e gelatine","una sola copertura",{role:"coat",kind:"fondant"},[
       G("Glasse, coperture e zuccheri",{},[
@@ -442,7 +442,7 @@
   }
 
   // tipi di strato: spessore iniziale e grammi per unità di spessore (torta base Ø 24 cm)
-  const LAYER_DEF = { sponge:[3,120,"Impasto"], biscuit:[1,180,"Base frolla"], puff:[1,120,"Sfoglia"], choux:[2,100,"Bignè"], cream:[1,150,"Crema"], mousse:[3,150,"Mousse"],
+  const LAYER_DEF = { sponge:[3,120,"Impasto"], biscuit:[1,180,"Base frolla"], puff:[1,120,"Sfoglia"], cream:[1,150,"Crema"], mousse:[3,150,"Mousse"],
     jam:[1,120,"Confettura"], fill:[1,150,"Frutta in pezzi"], ganache:[1,120,"Ganache"], spread:[1,100,"Crema spalmabile"], almond:[1,150,"Pasta di mandorle"], crunch:[1,60,"Croccante"] };
   // coperture: grammi totali
   const COAT_DEF = { fondant:500, glaze:300, almondglaze:250, gel:120, choc:300, dust:30, shine:20 };
@@ -451,7 +451,7 @@
   const DECO_DEF = { plaque:[34,1,1,15], basket:[14,4,1,6], wafer:[14,5,1,2], waferheart:[14,5,1,2], heart3d:[11,6,1,4], heart:[6,12,0,1], butterfly:[13,5,1,2],
     flower:[11,6,1,3], leaf:[9,8,0,1], baby:[13,3,1,5], cigar:[16,8,1,3], stripes:[13,6,1,3], fan:[14,6,1,3], curl:[8,10,0,1], snowball:[6,12,0,2], spiral:[15,6,1,3],
     cup:[12,4,1,6], cherry:[7,8,1,6], cube:[4,20,0,1], strip:[7,10,0,3], berry:[6,10,0,2], raisin:[3.5,20,0,.5], drop:[3,30,1,.3], disc:[6,12,0,1], flake:[4.5,30,0,.5], chunk:[5,12,0,4] };
-  const BASE_KINDS = new Set(["sponge","biscuit","puff","choux"]);
+  const BASE_KINDS = new Set(["sponge","biscuit","puff"]);
 
   const META = {};
   function metaOf(id){
@@ -530,7 +530,6 @@
       case "sponge": dots(area/(u*u*55),tone(col,-.32,.35),.5,1.5); dots(area/(u*u*90),tone(col,.4,.45),.4,1.1); break;
       case "biscuit": dots(area/(u*u*25),tone(col,-.4,.45),.3,.9); break;
       case "puff": { g.lineWidth=.8*u; for(let y=y0+1.6*u,i=0;y<y1;y+=1.8*u,i++){ g.strokeStyle=i%2?tone(col,.35,.8):tone(col,-.25,.7); g.beginPath(); for(let x=x0;x<=x1;x+=4*u) g.lineTo(x,y+Math.sin(x/(6*u)+i)*.5*u); g.stroke(); } break; }
-      case "choux": { g.fillStyle=tone(col,-.4,.4); for(let i=0;i<Math.min(600,area/(u*u*160));i++){ g.beginPath(); g.ellipse(x0+r()*w,y0+r()*h,(1.5+r()*2.5)*u,(1+r()*1.5)*u,0,0,7); g.fill(); } break; }
       case "cream": dots(area/(u*u*400),tone(col,.5,.35),1,2.5); break;
       case "mousse": dots(area/(u*u*35),tone(col,.6,.7),.25,.7); break;
       case "fill": { g.fillStyle=tone(col,.3,.25); g.fillRect(x0,y0+h*.18,w,h*.12);
@@ -788,7 +787,7 @@
     else {
       c=document.createElement("canvas"); c.width=c.height=256; const g=c.getContext("2d"), u=256/400*1.5;
       if(it.role==="layer"){
-        const k=kindFor(it,"layer"), h=k==="sponge"||k==="mousse"?92:k==="choux"?74:58, yb=200, yt=yb-h;
+        const k=kindFor(it,"layer"), h=k==="sponge"||k==="mousse"?92:58, yb=200, yt=yb-h;
         g.save(); bodyPath(g,128,yb,yt,104,28,false); g.clip(); fillTex(g,k,it.col,20,yt-30,236,yb+30,hashHue(id),u); g.restore();
         g.save(); topPath(g,128,yt,104,28,false); g.clip(); fillTex(g,k,it.col,20,yt-30,236,yt+30,hashHue(id)+1,u); g.fillStyle='rgba(255,255,255,.18)'; g.fillRect(0,0,256,256); g.restore();
         shadeBody(g,128,yb,yt,104,28,false); g.strokeStyle='rgba(29,5,61,.15)'; g.lineWidth=2; topPath(g,128,yt,104,28,false); g.stroke();
