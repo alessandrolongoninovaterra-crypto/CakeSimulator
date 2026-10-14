@@ -307,6 +307,7 @@
   .dz-coatamt{flex:1 1 auto; display:flex; align-items:center; justify-content:flex-end; gap:.45em; font-size:.8em; font-weight:700; color:var(--ink-dim); min-width:0;}
   .dz-coatamt input{width:min(9em,100%); min-width:4em; accent-color:var(--purple);}
   .dz-coatamt output{min-width:2.8em; text-align:right; font-family:var(--display); font-weight:800; color:var(--purple);}
+  .dz-mixsel{display:block; max-width:100%; margin-top:.25em; border:0; border-radius:8px; padding:.2em .45em; background:rgba(118,118,128,.12); color:var(--purple); font:700 .78em var(--body); cursor:pointer;}
 </style>
 </head>
 <body>
@@ -438,9 +439,15 @@
   indexItems();
   const nameOf = id => ITEM[id] ? ITEM[id].n : id;
   const catOf  = id => ITEM[id] ? ITEM[id].cat : null;
-  const ROLE_LABEL = {layer:"Strato", coat:"Copertura", deco:"Decorazione"};
+  const ROLE_LABEL = {layer:"Strato", coat:"Copertura", deco:"Decorazione", mix:"Nell'impasto"};
   const TAB_SHORT = {impasti:"Impasti", panettoni:"Panettoni", coperture:"Coperture", frutta:"Frutta", cioccolato:"Cioccolato", decorazioni:"Bon Ton", speciali:"Speciali e creme"};
-  const rolesOf = it => [it.role].concat(it.alt||[]);
+  // pezzi che si possono mettere dentro l'impasto (visibili nella vista interna)
+  const PIECE_ARTS = new Set(["cherry","cube","strip","berry","raisin","drop","disc","flake","chunk"]);
+  function mixArtOf(it){
+    if(!it||![it.role].concat(it.alt||[]).includes("deco")) return null;
+    const k=kindFor(it,"deco"); return PIECE_ARTS.has(k) ? k : k==="curl" ? "cube" : null; // cioccolato in tavoletta → pezzetti
+  }
+  const rolesOf = it => { const ro=[it.role].concat(it.alt||[]); return mixArtOf(it) ? ro.concat("mix") : ro; };
   function kindFor(it, role){
     if(role===it.role) return it.kind;
     if(role===it.drole && it.dkind) return it.dkind;
@@ -459,6 +466,7 @@
   const DECO_DEF = { plaque:[34,1,1,15], basket:[14,4,1,6], wafer:[14,5,1,2], waferheart:[14,5,1,2], heart3d:[11,6,1,4], heart:[6,12,0,1], butterfly:[13,5,1,2],
     flower:[11,6,1,3], leaf:[9,8,0,1], baby:[13,3,1,5], cigar:[16,8,1,3], stripes:[13,6,1,3], fan:[14,6,1,3], curl:[8,10,0,1], snowball:[6,12,0,2], spiral:[15,6,1,3],
     cup:[12,4,1,6], cherry:[7,8,1,6], cube:[4,20,0,1], strip:[7,10,0,3], berry:[6,10,0,2], raisin:[3.5,20,0,.5], drop:[3,30,1,.3], disc:[6,12,0,1], flake:[4.5,30,0,.5], chunk:[5,12,0,4] };
+  // basi "core" (Linea Cake, Paste Montate, Tradizionale, Panettoni): tutto il resto va sopra o dentro
   const BASE_KINDS = new Set(["sponge","biscuit","puff","leavened"]);
 
   const META = {};
@@ -579,7 +587,7 @@
 
   function drawCake(ctx,S,r,opts={}){
     if(r.shape==="loaf"||r.shape==="muffin"||r.shape==="panettone") return drawBaked(ctx,S,r,opts);
-    const an=opts.anim||null, u=S/400, cx=S/2, sq=r.shape==="square";
+    const an=opts.anim||null, u=S/400, cx=S/2, sq=r.shape==="square", inside=!!opts.interior;
     ctx.clearRect(0,0,S,S);
     if(opts.bg){ ctx.fillStyle=opts.bg; ctx.fillRect(0,0,S,S); }
     const layers=r.layers.filter(l=>ITEM[l.ingId]);
@@ -607,13 +615,17 @@
       if(rim){ // copertura vista di lato: bordo esterno attorno agli strati
         ctx.save(); ctx.globalAlpha=coatA; bodyPath(ctx,cx,yb,yt-rim,rx+rim,sq?0:ry*(rx+rim)/rx,sq); ctx.fillStyle=coat.col; ctx.fill(); ctx.restore();
       }
-      let y=yb;
+      let y=yb; const bands={};
+      const arc=x=>sq?0:Math.sin(Math.acos(Math.max(-1,Math.min(1,(x-cx)/rx))))*ry;
       layers.forEach(l=>{
         const it=ITEM[l.ingId], h=l.thick*uh*HS[i]*grow(l); if(h<=.2) return;
         ctx.save(); bodyPath(ctx,cx,y,y-h,rx,ry,sq); ctx.clip();
         fillTex(ctx,kindFor(it,"layer"),it.col,cx-rx,y-h-ry,cx+rx,y+ry+1,l.seed+i,u);
-        ctx.restore(); y-=h;
+        ctx.restore();
+        const yy=y; (bands[l.id]||(bands[l.id]=[])).push({x0:cx-rx,x1:cx+rx,y0:yy-h,y1:yy,off:arc,clip:()=>bodyPath(ctx,cx,yy,yy-h,rx,ry,sq)});
+        y-=h;
       });
+      if(inside) drawMix(ctx,r,bands,rx0*2,u);
       shadeBody(ctx,cx,yb,yt,rx,ry,sq);
       if(rim){ shadeBody(ctx,cx,yb,yt-rim,rx+rim,sq?0:ry*(rx+rim)/rx,sq); }
       // faccia superiore
@@ -634,8 +646,8 @@
       ctx.strokeStyle='rgba(29,5,61,.14)'; ctx.lineWidth=u*.7; topPath(ctx,cx,capY,crx,cry,sq); ctx.stroke();
       // copertura sul fianco: 0% = solo sopra, 100% = fino alla base
       const arcY=x=>sq?0:Math.sin(Math.acos(Math.max(-1,Math.min(1,(x-cx)/crx))))*cry;
-      const yEnd=Math.min(yb,yt+cp*th);
-      if(coat&&cp>0){
+      const yEnd=Math.min(yb,yt+(inside?0:cp)*th); // vista interna: niente velo sul fianco
+      if(coat&&cp>0&&!inside){
         ctx.save(); ctx.globalAlpha=coatA; bodyPath(ctx,cx,yEnd,capY,crx,cry,sq); ctx.clip();
         const bx=cx-crx-2, by=capY-crx, bw=crx*2+4, bh=yEnd-capY+crx*2;
         if(RIM_COATS.has(ck)){ ctx.fillStyle=tone(coat.col,.06); ctx.fillRect(bx,by,bw,bh); }
@@ -647,7 +659,7 @@
         if(RIM_COATS.has(ck)||ck==="gel") shadeBody(ctx,cx,yEnd,capY,crx,cry,sq);
       }
       // colature per glasse, cioccolato e gelatine, dal bordo della copertura
-      if(coat&&(ck==="glaze"||ck==="choc"||ck==="gel")){
+      if(coat&&!inside&&(ck==="glaze"||ck==="choc"||ck==="gel")){
         const rr=rng(31+i), n=Math.round(9+crx/(u*6)), dw=u*(ck==="gel"?2.4:3.4), room=yb-yEnd, maxL=Math.min(th*.3,room)+(cp>0?0:th*.12);
         ctx.save(); ctx.globalAlpha=coatA*(ck==="gel"?.75:1); ctx.fillStyle=ck==="gel"?tone(coat.col,0,.8):coat.col;
         if(maxL>u*2) for(let k=0;k<n;k++){
@@ -710,6 +722,26 @@
     });
   }
 
+  // ---- inclusioni nell'impasto (solo vista interna) ----
+  function defaultMixLayer(ls){ for(let k=ls.length-1;k>=0;k--) if(BASE_KINDS.has(kindFor(ITEM[ls[k].ingId],"layer"))) return ls[k]; return ls[ls.length-1]; }
+  function mixLayer(r,m){ const ls=r.layers.filter(l=>ITEM[l.ingId]); return ls.find(l=>l.id===m.layer) || defaultMixLayer(ls); }
+  // bands[layerId] = [{x0,x1,y0,y1,off(x),clip()}]: tratti dello strato visti in sezione
+  function drawMix(ctx,r,bands,sizeRef,u){
+    (r.mix||[]).filter(m=>ITEM[m.ingId]).forEach(m=>{
+      const L=mixLayer(r,m), it=ITEM[m.ingId], art=mixArtOf(it); if(!L||!art) return;
+      const img=getDecoArt(art,it.col), size=art===kindFor(it,"deco")?metaOf(m.ingId).size:DECO_DEF[art][0];
+      (bands[L.id]||[]).forEach((b,bi)=>{
+        const rnd=rng(m.seed+bi*977), w=b.x1-b.x0, h=b.y1-b.y0, dia=Math.min(sizeRef*size/100*1.1,h*1.3), n=Math.max(1,Math.round(m.count*w/sizeRef));
+        ctx.save(); b.clip(); ctx.clip();
+        for(let i=0;i<n;i++){
+          const x=b.x0+dia*.3+rnd()*Math.max(0,w-dia*.6), y=b.y0+b.off(x)+h*(.15+.7*rnd()), k=dia*(.8+rnd()*.4)/256;
+          ctx.save(); ctx.translate(x,y); ctx.rotate(rnd()*6.283); ctx.shadowColor='rgba(0,0,0,.28)'; ctx.shadowBlur=u*1.2; ctx.drawImage(img,-128*k,-128*k,256*k,256*k); ctx.restore();
+        }
+        ctx.restore();
+      });
+    });
+  }
+
   // ---- plumcake, muffin e panettone: vista frontale in sezione, altezza fissa, strati in proporzione ----
   const LINERS = {
     muffin:{n:16, a:'rgba(246,241,250,.9)', b:'rgba(246,241,250,.5)', line:'rgba(120,90,170,.35)', edge:'rgba(120,90,170,.6)'},
@@ -734,7 +766,7 @@
       topY:x=>yt-dh*Math.pow(Math.max(0,1-Math.pow(Math.abs(x-cx)/rx,2.4)),.55) };
   }
   function drawBaked(ctx,S,r,opts){
-    const an=opts.anim||null, u=S/400, G=bakedGeom(S,r.shape), muf=G.cupped, cx=G.cx;
+    const an=opts.anim||null, u=S/400, G=bakedGeom(S,r.shape), muf=G.cupped, cx=G.cx, inside=!!opts.interior;
     ctx.clearRect(0,0,S,S);
     if(opts.bg){ ctx.fillStyle=opts.bg; ctx.fillRect(0,0,S,S); }
     drawPlate(ctx,S,cx,G.yPlate,G.prx,G.prx*.2);
@@ -752,12 +784,16 @@
     const cp=coatPct(r), capB=muf ? G.yc-G.dh*.6+cp*G.dh*.6 : (cp>=1 ? G.yb+u*5 : G.yc+S*.006+cp*(G.H-S*.006)); // al 100% copre fino alla base, bordo dritto
     // strati
     ctx.save(); G.sil(ctx); ctx.clip();
-    let y=G.yb;
+    let y=G.yb; const bands={};
     layers.forEach((l,k)=>{
       const it=ITEM[l.ingId], h=l.thick*grow(l)/U*G.Htot, last=k===layers.length-1;
       if(h<=.2&&!last) return;
-      fillTex(ctx,kindFor(it,"layer"),it.col,cx-G.half-2,last?G.top-u*4:y-h,cx+G.half+2,y+1,l.seed,u); y-=h;
+      const y0=last?G.top-u*4:y-h, y1=y+1, x0=cx-G.half-2, x1=cx+G.half+2;
+      fillTex(ctx,kindFor(it,"layer"),it.col,x0,y0,x1,y1,l.seed,u);
+      bands[l.id]=[{x0,x1,y0:last?G.top+G.dh*.15:y0,y1,off:()=>0,clip:()=>{ ctx.beginPath(); ctx.rect(x0,y0,x1-x0,y1-y0); }}];
+      y-=h;
     });
+    if(inside) drawMix(ctx,r,bands,G.half*2,u);
     const sh=ctx.createLinearGradient(cx-G.half,0,cx+G.half,0);
     sh.addColorStop(0,'rgba(0,0,0,.18)'); sh.addColorStop(.3,'rgba(255,255,255,.06)'); sh.addColorStop(.7,'rgba(0,0,0,.02)'); sh.addColorStop(1,'rgba(0,0,0,.22)');
     ctx.fillStyle=sh; ctx.fillRect(0,0,S,S);
@@ -769,8 +805,11 @@
       ctx.beginPath(); for(let x=cx-G.half*.55;x<=cx+G.half*.55;x+=u*4){ const yy=G.topY(x)+u*3+Math.sin(x/(u*7))*u*1.2+(rr()-.5)*u; x===cx-G.half*.55?ctx.moveTo(x,yy):ctx.lineTo(x,yy); }
       ctx.lineWidth=u*3.4; ctx.strokeStyle=tone(topIt.col,-.45,.9); ctx.stroke(); ctx.lineWidth=u*1.2; ctx.strokeStyle=tone(topIt.col,.35,.9); ctx.stroke(); }
     ctx.restore();
-    // pirottino di carta (muffin) o pirottino da panettone
-    if(muf){
+    // pirottino di carta (muffin) o pirottino da panettone; nella vista interna si vede solo il bordo tagliato
+    if(muf&&inside){
+      ctx.strokeStyle=G.liner.edge; ctx.lineWidth=u*3; ctx.lineCap='round'; ctx.beginPath();
+      ctx.moveTo(cx-G.bw,G.yb); ctx.lineTo(cx-G.tw,G.yc); ctx.moveTo(cx+G.bw,G.yb); ctx.lineTo(cx+G.tw,G.yc); ctx.moveTo(cx-G.bw,G.yb); ctx.lineTo(cx+G.bw,G.yb); ctx.stroke();
+    } else if(muf){
       const L=G.liner;
       ctx.save(); G.cup(ctx); ctx.clip();
       const n=L.n, yb=G.yb, yc=G.yc;
@@ -792,15 +831,15 @@
       ctx.save(); ctx.globalAlpha=coatA; capPath(); ctx.clip();
       if(RIM_COATS.has(ck)){
         const q=ctx.createLinearGradient(0,G.top,0,capB); q.addColorStop(0,tone(coat.col,.3)); q.addColorStop(1,tone(coat.col,-.08));
-        G.sil(ctx); ctx.fillStyle=q; ctx.lineJoin='round'; ctx.lineWidth=u*9; ctx.strokeStyle=q; ctx.stroke(); ctx.fill();
+        G.sil(ctx); ctx.fillStyle=q; ctx.lineJoin='round'; ctx.lineWidth=u*9; ctx.strokeStyle=q; ctx.stroke(); if(!inside) ctx.fill(); // interno: solo il guscio
         if(ck==="almondglaze"){ const rr=rng(9); ctx.fillStyle=tone(coat.col,-.25,.6); for(let k=0;k<Math.round(400+900*cp);k++){ ctx.beginPath(); ctx.arc(cx-G.half+rr()*G.half*2,G.top+rr()*(capB-G.top),(.3+rr()*.6)*u,0,7); ctx.fill(); } }
       }
-      if(ck==="shine"){ G.sil(ctx); ctx.fillStyle='rgba(255,255,255,.16)'; ctx.fill(); }
-      if(ck==="gel"){ G.sil(ctx); ctx.fillStyle=tone(coat.col,0,.55); ctx.lineWidth=u*3; ctx.strokeStyle=ctx.fillStyle; ctx.stroke(); ctx.fill(); }
+      if(ck==="shine"&&!inside){ G.sil(ctx); ctx.fillStyle='rgba(255,255,255,.16)'; ctx.fill(); }
+      if(ck==="gel"){ G.sil(ctx); ctx.fillStyle=tone(coat.col,0,.55); ctx.lineWidth=u*3; ctx.strokeStyle=ctx.fillStyle; ctx.stroke(); if(!inside) ctx.fill(); }
       if(ck==="dust"){ G.sil(ctx); ctx.clip(); const rr=rng(7); ctx.fillStyle='rgba(255,255,255,.92)'; for(let k=0;k<Math.round(500+1200*cp);k++){ const x=cx-G.half+rr()*G.half*2, y0=G.topY(x); ctx.beginPath(); ctx.arc(x,y0+rr()*Math.max(G.dh*.3,capB-y0),(.3+rr()*.8)*u,0,7); ctx.fill(); } }
-      if(ck!=="dust"&&ck!=="fondant"&&ck!=="almondglaze"){ ctx.fillStyle='rgba(255,255,255,.45)'; ctx.beginPath(); ctx.ellipse(cx-G.half*.32,G.topY(cx-G.half*.32)+u*5,G.half*.2,u*2.6,-.12,0,7); ctx.fill(); }
+      if(!inside&&ck!=="dust"&&ck!=="fondant"&&ck!=="almondglaze"){ ctx.fillStyle='rgba(255,255,255,.45)'; ctx.beginPath(); ctx.ellipse(cx-G.half*.32,G.topY(cx-G.half*.32)+u*5,G.half*.2,u*2.6,-.12,0,7); ctx.fill(); }
       ctx.restore();
-      if(ck==="glaze"||ck==="choc"||ck==="gel"){
+      if(!inside&&(ck==="glaze"||ck==="choc"||ck==="gel")){
         const rr=rng(31), w=muf?G.half*.95:G.half, n=Math.round(7+w/(u*7)), dw=u*(ck==="gel"?2.2:3.2), maxL=muf?G.dh*.55:Math.min(G.H*.4,G.yb-capB);
         ctx.save(); ctx.globalAlpha=coatA*(ck==="gel"?.75:1); ctx.fillStyle=ck==="gel"?tone(coat.col,0,.8):coat.col;
         if(maxL>u*2) for(let k=0;k<n;k++){ const x=cx-w+(k+.5)/n*w*2, base=capB-u*2, len=(rr()*.8+.15)*maxL*coatA;
@@ -856,16 +895,16 @@
   const thumbImg = id => `<img src="${thumbSrc(id)}" alt="">`;
 
   // ===================== STATO =====================
-  const MAX_LAYERS = 12, MAX_DECOS = 8;
-  const emptyRecipe = () => ({shape:"round", tiers:1, layers:[], coat:null, coatPct:30, decos:[]});
+  const MAX_LAYERS = 12, MAX_DECOS = 8, MAX_MIX = 6;
+  const emptyRecipe = () => ({shape:"round", tiers:1, layers:[], coat:null, coatPct:30, decos:[], mix:[]});
   const cake = { name:"", recipe:emptyRecipe() };
-  let activeCat = "impasti", sheetIng = null;
+  let activeCat = "impasti", sheetIng = null, viewMode = "out"; // out = esterno, in = sezione con l'interno
   const root = document.getElementById("pc-app");
 
   function recipeStats(r){
     const ls=r.layers.filter(l=>ITEM[l.ingId]), ds=r.decos.filter(d=>ITEM[d.ingId]);
     return { layers:ls.length, bases:ls.filter(l=>BASE_KINDS.has(kindFor(ITEM[l.ingId],"layer"))).length, decoTypes:ds.length,
-      pieces:ds.reduce((a,d)=>a+d.count,0), hasCoat:!!(r.coat&&ITEM[r.coat]) };
+      pieces:ds.reduce((a,d)=>a+d.count,0), hasCoat:!!(r.coat&&ITEM[r.coat]), mixTypes:(r.mix||[]).filter(m=>ITEM[m.ingId]).length };
   }
   const SHAPES = [["round","● Rotonda"],["square","■ Quadrata"],["loaf","Plumcake"],["muffin","Muffin"],["panettone","Panettone"]];
   const SHAPE_NAME = {round:"Rotonda", square:"Quadrata", loaf:"Plumcake", muffin:"Muffin", panettone:"Panettone"};
@@ -880,11 +919,11 @@
   // ===================== PROGETTAZIONE TORTA =====================
   const ICON_ADJUST='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 4h7M13 4h1M2 8h2M8 8h6M2 12h8"/><circle cx="11" cy="4" r="1.6"/><circle cx="6" cy="8" r="1.6"/><circle cx="12" cy="12" r="1.6"/></svg>';
 
-  function usedCount(r,id){ return r.layers.filter(l=>l.ingId===id).length + (r.decos.find(d=>d.ingId===id)||{count:0}).count; }
+  function usedCount(r,id){ return r.layers.filter(l=>l.ingId===id).length + (r.decos.find(d=>d.ingId===id)||{count:0}).count + ((r.mix||[]).find(m=>m.ingId===id)||{count:0}).count; }
   function tabsHtml(){
     const r=cake.recipe;
     return CAT_TAB.map(c=>{
-      const n=INGREDIENTS[c].items.filter(it=>r.coat===it.id||r.layers.some(l=>l.ingId===it.id)||r.decos.some(d=>d.ingId===it.id)).length;
+      const n=INGREDIENTS[c].items.filter(it=>r.coat===it.id||r.layers.some(l=>l.ingId===it.id)||r.decos.some(d=>d.ingId===it.id)||(r.mix||[]).some(m=>m.ingId===it.id)).length;
       return `<button role="tab" class="dz-tab" data-act="dz-tab" data-v="${c}" aria-selected="${c===activeCat}" title="${INGREDIENTS[c].label}">${TAB_SHORT[c]||INGREDIENTS[c].label}${n?`<b>${n}</b>`:""}</button>`;
     }).join("");
   }
@@ -895,7 +934,7 @@
       const sel=r.coat===it.id, n=usedCount(r,it.id);
       return head+`<div class="dz-tile ${sel?"sel":""} ${n?"on":""} ${lastPicked===it.id?"pop":""}" style="--i:${idx}">
           <button class="dz-tbtn" data-act="dz-pick" data-id="${it.id}" aria-label="${ROLE_LABEL[it.role]}: ${escapeHtml(it.n)}"><span class="dz-thumb">${thumbImg(it.id)}</span><span class="dz-tn">${escapeHtml(it.n)}</span></button>
-          <span class="dz-role">${ROLE_LABEL[it.role]}${it.alt.length?" +":""}</span>
+          <span class="dz-role">${viewMode==="in"&&mixArtOf(it)?ROLE_LABEL.mix:ROLE_LABEL[it.role]}${rolesOf(it).length>1?" +":""}</span>
           ${n?`<span class="dz-badge">${n}</span>`:sel?`<span class="dz-badge">✓</span>`:""}
           <button class="dz-tedit" data-act="dz-adjust" data-id="${it.id}" aria-label="Opzioni di ${escapeHtml(it.n)}">${ICON_ADJUST}</button>
         </div>`;
@@ -903,11 +942,12 @@
   }
   function noteHtml(){
     const st=recipeStats(cake.recipe);
+    if(viewMode==="in"&&!["impasti","panettoni","coperture"].includes(activeCat)) return ["","Vista interna: tocca canditi, gocce, cubetti, frutta o croccante per metterli nell'impasto. Nell'elenco scegli in quale strato."];
     if(activeCat==="impasti") return ["","Ogni tocco aggiunge uno strato in cima. Alterna impasti e farciture."];
     if(activeCat==="coperture") return ["","Scegli una copertura; toccala di nuovo per toglierla."];
     if(activeCat==="decorazioni") return [st.decoTypes>=MAX_DECOS?"warn":"",`Tocca per mettere decorazioni, di nuovo per aggiungerne (max ${MAX_DECOS} tipi). Nel disegno trascinale per spostarle; ⟳ le rimette a caso.`];
     if(st.layers>=MAX_LAYERS) return ["warn",`Hai raggiunto ${MAX_LAYERS} strati. Togline uno per aggiungerne altri.`];
-    return ["","Tocca un prodotto per usarlo. Con ⚙ in alto a sinistra puoi usarlo in un altro modo (strato, copertura, decorazione)."];
+    return ["","Tocca un prodotto per usarlo. Con ⚙ in alto a sinistra puoi usarlo in un altro modo (strato, copertura, decorazione, nell'impasto)."];
   }
   function layersHtml(){
     const r=cake.recipe;
@@ -921,6 +961,15 @@
         <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(nameOf(d.ingId))}">×</button>
       </li>`).join("");
     const ls=r.layers.filter(l=>ITEM[l.ingId]);
+    const layerOpts=m=>ls.slice().reverse().map((l,k)=>`<option value="${l.id}" ${mixLayer(r,m)===l?"selected":""}>Strato ${ls.length-k} · ${escapeHtml(nameOf(l.ingId))}</option>`).join("");
+    const mixes=(r.mix||[]).filter(m=>ITEM[m.ingId]).map(m=>`
+      <li class="dz-layer ${m.id===newLayerId?"new":""}" data-mix="${m.id}">
+        <span class="dz-thumb sm">${thumbImg(m.ingId)}</span>
+        <div class="dz-lname">${escapeHtml(nameOf(m.ingId))}<small>Nell'impasto · pezzi</small>${ls.length?`<select class="dz-mixsel" data-field="mixlayer" aria-label="Strato in cui metterlo">${layerOpts(m)}</select>`:""}</div>
+        <div class="dz-step"><button data-act="dz-dec" aria-label="Meno pezzi">−</button><input type="number" inputmode="numeric" min="1" max="99" value="${m.count}" data-field="count" aria-label="Pezzi di ${escapeHtml(nameOf(m.ingId))}"><button data-act="dz-inc" aria-label="Più pezzi">+</button></div>
+        <button class="dz-ibtn" data-act="dz-reshuffle" title="Rimescola" aria-label="Rimescola">⟳</button>
+        <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(nameOf(m.ingId))}">×</button>
+      </li>`).join("");
     const layers=ls.slice().reverse().map((l,k)=>{ const it=ITEM[l.ingId], lk=kindFor(it,"layer"); return `
       <li class="dz-layer ${l.id===newLayerId?"new":""}" data-layer="${l.id}">
         <span class="dz-thumb sm">${thumbImg(l.ingId)}</span>
@@ -929,17 +978,18 @@
         <div class="dz-ud"><button class="dz-ibtn" data-act="dz-up" title="Sposta su" aria-label="Sposta su">↑</button><button class="dz-ibtn" data-act="dz-down" title="Sposta giù" aria-label="Sposta giù">↓</button></div>
         <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(it.n)}">×</button>
       </li>`; }).join("");
-    return coat + (decos?`<li class="dz-sec">Decorazioni</li>${decos}`:"") + `<li class="dz-sec">Strati (dall'alto)</li>` + (layers||`<li class="dz-empty">Nessuno strato. Inizia da un impasto.</li>`);
+    return coat + (decos?`<li class="dz-sec">Decorazioni</li>${decos}`:"") + (mixes?`<li class="dz-sec">Nell'impasto</li>${mixes}`:"") + `<li class="dz-sec">Strati (dall'alto)</li>` + (layers||`<li class="dz-empty">Nessuno strato. Inizia da un impasto.</li>`);
   }
   function shapeHtml(){
     const r=cake.recipe;
-    return `<span>Forma</span><div class="dz-seg">${SHAPES.map(([v,l])=>`<button data-act="dz-shape" data-v="${v}" aria-pressed="${r.shape===v}">${l}</button>`).join("")}</div>
+    return `<span>Vista</span><div class="dz-seg">${[["out","Esterno"],["in","Interno"]].map(([v,l])=>`<button data-act="dz-view" data-v="${v}" aria-pressed="${viewMode===v}">${l}</button>`).join("")}</div>
+      <span>Forma</span><div class="dz-seg">${SHAPES.map(([v,l])=>`<button data-act="dz-shape" data-v="${v}" aria-pressed="${r.shape===v}">${l}</button>`).join("")}</div>
       ${hasTiers(r)?`<span>Piani</span><div class="dz-seg">${[1,2,3].map(n=>`<button data-act="dz-tiers" data-v="${n}" aria-pressed="${(r.tiers||1)===n}">${n}</button>`).join("")}</div>`:""}`;
   }
   function footerHtml(){
     const st=recipeStats(cake.recipe);
     return `<div class="pc-footer-stats">
-        <div><span class="pc-footer-count">${st.layers}</span> <span class="pc-footer-note">strati · ${st.decoTypes} decorazioni · ${st.pieces} pezzi</span></div>
+        <div><span class="pc-footer-count">${st.layers}</span> <span class="pc-footer-note">strati · ${st.decoTypes} decorazioni · ${st.pieces} pezzi${st.mixTypes?` · ${st.mixTypes} nell'impasto`:""}</span></div>
         <div class="pc-footer-note ${st.bases?"ok":"warn"}">${st.bases?"✓ impasto presente":"manca un impasto"}</div>
         <div class="pc-footer-note ${st.hasCoat?"ok":""}">${st.hasCoat?"✓ copertura":"senza copertura"}</div>
       </div>
@@ -979,13 +1029,13 @@
   function drawCakeCanvas(){
     const cv=$("#dz-cv"); if(!cv) return;
     const ctx=cv.getContext("2d");
-    if(!cakeAnim||window.matchMedia("(prefers-reduced-motion:reduce)").matches){ cakeAnim=null; const hits=[]; drawCake(ctx,cv.width,cake.recipe,{hits}); decoHits=hits; return; }
+    if(!cakeAnim||window.matchMedia("(prefers-reduced-motion:reduce)").matches){ cakeAnim=null; const hits=[]; drawCake(ctx,cv.width,cake.recipe,{hits,interior:viewMode==="in"}); decoHits=hits; return; }
     cancelAnimationFrame(animRaf);
     const a=cakeAnim, t0=performance.now(), dur=a.coat!=null?600:650;
     const step=now=>{
       const t=Math.min(1,(now-t0)/dur);
       if(!$("#dz-cv")) return;
-      const hits=[]; drawCake(ctx,cv.width,cake.recipe,t<1?{anim:{layer:a.layer,deco:a.deco,from:a.from||0,t,coat:a.coat!=null?t:null}}:{hits}); if(t>=1) decoHits=hits;
+      const hits=[]; drawCake(ctx,cv.width,cake.recipe,t<1?{anim:{layer:a.layer,deco:a.deco,from:a.from||0,t,coat:a.coat!=null?t:null},interior:viewMode==="in"}:{hits,interior:viewMode==="in"}); if(t>=1) decoHits=hits;
       if(t<1) animRaf=requestAnimationFrame(step); else cakeAnim=null;
     };
     animRaf=requestAnimationFrame(step);
@@ -1008,6 +1058,16 @@
     if(!ITEM[id]) return;
     const r=cake.recipe, st=recipeStats(r), m=metaOf(id);
     lastPicked=id;
+    if(role==="mix"){
+      const art=mixArtOf(ITEM[id]); if(!art) return;
+      if(!st.layers){ toast("Aggiungi prima uno strato di impasto."); return; }
+      const ex=(r.mix||(r.mix=[])).find(x=>x.ingId===id);
+      if(ex) ex.count=Math.min(99,ex.count+Math.max(2,Math.round(DECO_DEF[art][1]/3)));
+      else { if(st.mixTypes>=MAX_MIX){ toast(`Massimo ${MAX_MIX} prodotti nell'impasto. Togline uno prima.`); return; }
+        const x={id:uid(), ingId:id, count:DECO_DEF[art][1], seed:newSeed(), layer:null}; r.mix.push(x); newLayerId=x.id; }
+      if(viewMode!=="in"){ viewMode="in"; toast("Vista interna: ora vedi cosa c'è nell'impasto."); }
+      cakeAnim=null; refreshDesigner(); return;
+    }
     if(role==="coat"){ r.coat=r.coat===id?null:id; cakeAnim=r.coat?{coat:0}:null; refreshDesigner(); return; }
     if(role==="layer"){
       if(st.layers>=MAX_LAYERS){ toast(`Massimo ${MAX_LAYERS} strati. Togline uno prima.`); return; }
@@ -1024,9 +1084,9 @@
   function resetClear(){ clearTimeout(clearArm); clearArm=0; const b=$("#dz-clear"); if(b){ b.textContent="Svuota"; b.classList.remove("armed"); } }
   function clearAll(btn){
     const r=cake.recipe;
-    if(!r.layers.length&&!r.coat&&!r.decos.length){ toast("La torta è già vuota."); return; }
+    if(!r.layers.length&&!r.coat&&!r.decos.length&&!(r.mix||[]).length){ toast("La torta è già vuota."); return; }
     if(!clearArm){ btn.textContent="Tocca per confermare"; btn.classList.add("armed"); clearArm=setTimeout(resetClear,3000); return; }
-    resetClear(); r.layers=[]; r.coat=null; r.decos=[]; activeCat="impasti"; refreshDesigner(); toast("Torta svuotata.");
+    resetClear(); r.layers=[]; r.coat=null; r.decos=[]; r.mix=[]; activeCat="impasti"; refreshDesigner(); toast("Torta svuotata.");
   }
 
   // ---- adatta l'elenco "La torta" al riquadro ----
@@ -1057,7 +1117,7 @@
     const fld=(label,field,val,unit)=>`<label class="dz-fld">${label}<input type="number" inputmode="decimal" data-field="${field}" min="0" step="1" value="${val||""}" placeholder="0"><span class="unit">${unit}</span></label>`;
     $("#dz-sheet-body").innerHTML=`
       <div class="dz-shead"><span class="dz-thumb big">${thumbImg(id)}</span><div><h3>${escapeHtml(it.n)}</h3><span class="pc-field-label" style="margin:0;">${escapeHtml(it.g)}</span></div></div>
-      <div><span class="pc-field-label">Usa come</span><div class="dz-roles">${roles.map((ro,i)=>`<button class="pc-btn ${i?"ghost":"gold"} small" data-act="sheet-use" data-role="${ro}">${ro==="layer"?"+ Strato":ro==="coat"?(cake.recipe.coat===id?"Togli copertura":"Copertura"):"+ Decorazione"}</button>`).join("")}</div></div>
+      <div><span class="pc-field-label">Usa come</span><div class="dz-roles">${roles.map((ro,i)=>`<button class="pc-btn ${i?"ghost":"gold"} small" data-act="sheet-use" data-role="${ro}">${ro==="layer"?"+ Strato":ro==="coat"?(cake.recipe.coat===id?"Togli copertura":"Copertura"):ro==="mix"?"+ Nell'impasto":"+ Decorazione"}</button>`).join("")}</div></div>
       ${roles.includes("deco")?`<label class="dz-fld">Dimensione<input type="range" data-field="size" min="2" max="45" step="1" value="${m.size}"><output>${m.size}%</output></label>`:""}
       ${roles.includes("layer")?fld("Peso / strato","wLayer",m.wLayer,"g"):""}
       ${roles.includes("coat")?fld("Peso copertura 100%","wCoat",m.wCoat,"g"):""}
@@ -1092,9 +1152,13 @@
     doc.setTextColor(29,5,61); doc.text(title,M,39);
     doc.setFont("helvetica","normal"); doc.setFontSize(10.5); doc.setTextColor(110,100,128);
     doc.text(pdfText(`${SHAPE_NAME[r.shape]||"Rotonda"}${hasTiers(r)?`, ${r.tiers||1} ${(r.tiers||1)===1?"piano":"piani"}`:""}  ·  ${st.layers} strati, ${st.pieces} decorazioni`),M,46);
-    const off=document.createElement("canvas"); off.width=off.height=1500; drawCake(off.getContext("2d"),1500,r,{bg:"#FFFFFF"});
-    const IS=104; doc.addImage(off.toDataURL("image/jpeg",.92),"JPEG",(W-IS)/2,50,IS,IS);
+    const shot=interior=>{ const c=document.createElement("canvas"); c.width=c.height=1500; drawCake(c.getContext("2d"),1500,r,{bg:"#FFFFFF",interior}); return c.toDataURL("image/jpeg",.92); };
     let y=165;
+    if((r.mix||[]).some(m=>ITEM[m.ingId])){
+      const IS=86; doc.addImage(shot(false),"JPEG",W/2-IS-3,50,IS,IS); doc.addImage(shot(true),"JPEG",W/2+3,50,IS,IS);
+      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(110,100,128);
+      doc.text("ESTERNO",W/2-IS/2-3,140,{align:"center"}); doc.text("SEZIONE (INTERNO)",W/2+IS/2+3,140,{align:"center"}); y=152;
+    } else { const IS=104; doc.addImage(shot(false),"JPEG",(W-IS)/2,50,IS,IS); }
     const head=()=>{ doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(110,100,128);
       doc.text("PRODOTTO",M+14,y); doc.text("USO",120,y); doc.text("QUANTITÀ",158,y,{align:"right"}); doc.text("G TOTALI",W-M,y,{align:"right"});
       doc.setDrawColor(29,5,61); doc.setLineWidth(.5); doc.line(M,y+2.5,W-M,y+2.5); y+=9; };
@@ -1112,6 +1176,8 @@
     if(r.coat&&ITEM[r.coat]){ const w=metaOf(r.coat).wCoat*tf*coatWeightK(r); grams+=w; row(r.coat,INGREDIENTS[catOf(r.coat)].label,"Copertura",Math.round(coatPct(r)*100)+"%",w>0?fmtNum(w,0):"-"); }
     r.decos.filter(d=>ITEM[d.ingId]).forEach(d=>{ const w=metaOf(d.ingId).wDeco*d.count; grams+=w; row(d.ingId,INGREDIENTS[catOf(d.ingId)].label,"Decorazione",d.count+" pz",w>0?fmtNum(w,0):"-"); });
     const ls=r.layers.filter(l=>ITEM[l.ingId]);
+    (r.mix||[]).filter(m=>ITEM[m.ingId]).forEach(m=>{ const L=mixLayer(r,m), w=metaOf(m.ingId).wDeco*m.count*tf; grams+=w;
+      row(m.ingId,INGREDIENTS[catOf(m.ingId)].label+(L?` · nello strato ${ls.length-ls.indexOf(L)}`:""),"Nell'impasto",m.count+" pz",w>0?fmtNum(w,0):"-"); });
     ls.slice().reverse().forEach((l,k)=>{ const w=metaOf(l.ingId).wLayer*l.thick*tf; grams+=w; row(l.ingId,INGREDIENTS[catOf(l.ingId)].label,`Strato ${ls.length-k}`,"spess. "+l.thick,w>0?fmtNum(w,0):"-"); });
     if(!ls.length&&!r.coat&&!r.decos.length){ doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor(110,100,128); doc.text("Nessun prodotto scelto.",M+14,y+2); y+=RH; }
     if(y+RH>H-M-6){ doc.addPage(); y=M+4; }
@@ -1130,7 +1196,8 @@
     const act=b.dataset.act, id=b.dataset.id, r=cake.recipe;
     switch(act){
       case "dz-tab": activeCat=b.dataset.v; refreshDesigner(); animateTilesEnter(); return;
-      case "dz-pick": useAs(id,ITEM[id].role); return;
+      case "dz-pick": useAs(id,viewMode==="in"&&mixArtOf(ITEM[id])?"mix":ITEM[id].role); return;
+      case "dz-view": viewMode=b.dataset.v; cakeAnim=null; refreshDesigner(); return;
       case "dz-adjust": openSheet(id); return;
       case "sheet-use": { const ing=sheetIng; closeSheet(); useAs(ing,b.dataset.role); return; }
       case "sheet-close": closeSheet(); return;
@@ -1141,7 +1208,15 @@
       case "dz-pdf": makePDF(); return;
       case "dz-rm-coat": r.coat=null; refreshDesigner(); return;
     }
-    const li=b.closest("[data-layer]"), ld=b.closest("[data-deco]");
+    const li=b.closest("[data-layer]"), ld=b.closest("[data-deco]"), lm=b.closest("[data-mix]");
+    if(lm){
+      const m=(r.mix||[]).find(x=>x.id===lm.dataset.mix); if(!m) return;
+      if(act==="dz-inc") m.count=Math.min(99,m.count+1);
+      else if(act==="dz-dec") m.count=Math.max(1,m.count-1);
+      else if(act==="dz-reshuffle") m.seed=newSeed();
+      else if(act==="dz-rm") r.mix=r.mix.filter(x=>x!==m);
+      refreshDesigner(); return;
+    }
     if(li){
       const L=r.layers.find(l=>l.id===li.dataset.layer); if(!L) return;
       if(act==="dz-inc") L.thick=Math.min(6,L.thick+1);
@@ -1167,8 +1242,9 @@
   });
   document.addEventListener("change", e=>{
     const t=e.target;
-    if(t.dataset.field!=="thick"&&t.dataset.field!=="count") return;
-    const r=cake.recipe, li=t.closest("[data-layer]"), ld=t.closest("[data-deco]");
+    if(t.dataset.field!=="thick"&&t.dataset.field!=="count"&&t.dataset.field!=="mixlayer") return;
+    const r=cake.recipe, li=t.closest("[data-layer]"), ld=t.closest("[data-deco]"), lm=t.closest("[data-mix]");
+    if(lm){ const m=(r.mix||[]).find(x=>x.id===lm.dataset.mix); if(m){ if(t.dataset.field==="mixlayer") m.layer=t.value; else m.count=Math.max(1,Math.min(99,parseInt(t.value,10)||1)); } }
     if(li){ const L=r.layers.find(l=>l.id===li.dataset.layer); if(L) L.thick=Math.max(1,Math.min(6,parseInt(t.value,10)||1)); }
     if(ld){ const d=r.decos.find(x=>x.id===ld.dataset.deco); if(d) d.count=Math.max(1,Math.min(99,parseInt(t.value,10)||1)); }
     refreshDesigner();
