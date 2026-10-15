@@ -82,32 +82,11 @@
   }
   .pc-name-input:focus{outline:none; border-color:var(--purple);}
   .pc-name-input:disabled{background:var(--bg-2); color:var(--ink-dim);}
-  .pc-recipe-footer{
-    flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:10px 14px; flex-wrap:wrap;
-    background:var(--bg); border:1.5px solid var(--line); border-radius:14px; padding:9px 16px; margin-top:10px;
-  }
-  .pc-recipe-footer .pc-btn{flex-shrink:0;}
-  .pc-footer-stats{display:flex; gap:18px; align-items:center; flex-wrap:wrap;}
-  .pc-footer-count{font-family:var(--display); font-weight:800; font-size:17px; color:var(--purple); font-variant-numeric:tabular-nums;}
-  .pc-footer-note{font-size:11px; color:var(--ink-dim); font-weight:600;}
-  .pc-footer-note.ok{color:var(--purple);}
-  .pc-footer-note.warn{color:var(--red);}
-  .pc-footer-btns{display:flex; gap:8px;}
   .pc-settings-note{font-size:11.5px; color:var(--ink-dim); margin-top:4px; line-height:1.4;}
   /* ===================== PIZZA DESIGNER (team page) ===================== */
   .dz{font-size:clamp(11px,1.55vmin,16px); padding:.9em 16px .9em;}
-  .dz-head{display:flex; flex-wrap:wrap; align-items:center; gap:.6em 1.1em; padding-bottom:.7em; border-bottom:3px solid var(--purple); margin-bottom:.8em; flex-shrink:0;}
-  .dz-idblock{display:flex; align-items:center; gap:.8em;}
-  .dz-idblock .pc-eyebrow{margin:0; font-size:.8em;}
-  .dz-idblock{min-width:0; max-width:40%;}
-  .dz-idblock > div{min-width:0;}
-  .dz-idblock .pc-title{font-size:2em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;}
-  .dz-fields{display:flex; gap:.7em; flex:1 1 22em; min-width:0;}
-  .dz-fields label{flex:1; min-width:0;}
-  .dz-fields .pc-field-label{font-size:.75em; margin-bottom:.25em;}
-  .dz-fields .pc-name-input{font-size:1em; padding:.5em .7em;}
   .dz-bench{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,3fr) minmax(0,2fr); /* 3/5 disegno, 2/5 menu */ gap:.9em;}
-  .dz-stage{min-height:0; min-width:0; display:flex; background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:.6em;}
+  .dz-stage{flex:1; min-height:0; min-width:0; display:flex;}
   .dz-stage canvas{width:100%; height:100%; object-fit:contain; display:block;}
   .dz-side{min-height:0; min-width:0; display:flex; flex-direction:column; gap:.8em;}
   .dz-box{background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:.7em .8em; min-height:0; display:flex; flex-direction:column; overflow:hidden;}
@@ -144,11 +123,8 @@
   .dz-rechead h3{font-family:var(--display); font-weight:800; font-size:1.05em; color:var(--purple); text-transform:uppercase; letter-spacing:.05em; margin-right:auto;}
   .dz-rechead .pc-btn{font-size:.85em; padding:.45em .7em; min-height:2.4em;}
   .dz-layers{list-style:none; margin:0; padding:0; flex:1 1 0; min-height:0; overflow:hidden; font-size:calc(var(--rs,1) * 1em); display:grid; grid-template-columns:repeat(var(--lc,1),minmax(0,1fr)); column-gap:.9em; align-content:start;}
-  .dz-layers.c2{--lc:2}
-  .dz-layers.c2 .dz-thumb,.dz-layers.c2 .dz-ud,.dz-layers.c2 [data-act="dz-reshuffle"],.dz-layers.tight .dz-lname small{display:none;}
   .dz-layer{display:flex; align-items:center; gap:.55em; padding:.35em 0; border-bottom:1px solid var(--line);}
   .dz-lname{flex:1 1 0; min-width:0; font-weight:700; line-height:1.2; overflow-wrap:break-word; hyphens:auto;}
-  .dz-layers.c2 .dz-lname{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .dz-lname small{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; font-size:.78em; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.04em;}
   .dz-step{flex:none; display:inline-flex; align-items:center; border:1.5px solid var(--line); border-radius:.5em; background:var(--bg); overflow:hidden;}
   .dz-step button{border:0; background:transparent; width:2.3em; height:2.5em; font-size:1.25em; cursor:pointer; line-height:1; padding:0; color:var(--purple); font-weight:700;}
@@ -209,8 +185,7 @@
   .pc-btn.armed{background-color:var(--red); background-image:var(--gloss),linear-gradient(180deg,#F2604F 0%,#C92A1D 100%); color:#fff;}
   .pc-btn:disabled{background-color:#E7E3ED; background-image:var(--gloss-soft); box-shadow:inset 0 0 0 1px var(--line); color:#A39AB3; text-shadow:none; filter:none; transform:none;}
   /* panels and cards: soft rounded, gentle depth */
-  .dz-box,.dz-stage,.pc-recipe-footer{border-radius:24px; border:0; box-shadow:0 1px 2px rgba(29,5,61,.06), 0 10px 30px rgba(29,5,61,.08); background:rgba(255,255,255,.92);}
-  .pc-recipe-footer{padding:10px 14px 10px 20px;}
+  .dz-box,.dz-stagebox{border-radius:24px; border:0; box-shadow:0 1px 2px rgba(29,5,61,.06), 0 10px 30px rgba(29,5,61,.08); background:rgba(255,255,255,.92);}
   /* inputs: iOS fields */
   .pc-name-input,.dz-fld input[type=number]{border-radius:12px; border:0; background:#fff; box-shadow:inset 0 0 0 1px var(--line), inset 0 2px 3px rgba(29,5,61,.05); min-height:42px;}
   .pc-name-input:focus{box-shadow:inset 0 0 0 2px #7B4FD0, 0 0 0 4px rgba(123,79,208,.15);}
@@ -259,7 +234,7 @@
   .pc-root::after{width:70vmax; height:70vmax; right:-25vmax; bottom:-30vmax; background:radial-gradient(circle, rgba(106,47,176,.45), rgba(106,47,176,0) 65%); animation:auroraB 32s ease-in-out infinite alternate;}
   @keyframes auroraA{to{transform:translate(18vmax,14vmax) scale(1.15);}}
   @keyframes auroraB{to{transform:translate(-16vmax,-12vmax) scale(1.1);}}
-  .dz-box,.dz-stage,.pc-recipe-footer{background:rgba(255,255,255,.82);}
+  .dz-box,.dz-stagebox{background:rgba(255,255,255,.82);}
   @keyframes tileIn{from{opacity:0; transform:translateY(18px) scale(.94);}to{opacity:1; transform:none;}}
   .dz-tiles.enter .dz-tile{animation:tileIn .5s var(--spring) both; animation-delay:calc(var(--i,0) * 30ms);}
   /* designer micro-interactions */
@@ -273,8 +248,6 @@
   .dz-stage canvas{transition:transform .5s var(--spring);}
   .dz-stage.bounce canvas{animation:plate .5s var(--spring);}
   @keyframes plate{35%{transform:scale(.985);}100%{transform:none;}}
-  .pc-footer-count{display:inline-block;}
-  .pc-footer-count.bump{animation:pop .4s var(--spring);}
   /* sheet + toast springs */
   .dz-sheet:not([hidden]){animation:fadeIn .25s ease both;}
   .dz-sheet:not([hidden]) .dz-sheet-panel{animation:sheetUp .5s var(--spring) both;}
@@ -310,6 +283,48 @@
   .dz-mixsel{display:block; max-width:100%; margin-top:.25em; border:0; border-radius:8px; padding:.2em .45em; background:rgba(118,118,128,.12); color:var(--purple); font:700 .78em var(--body); cursor:pointer;}
   .dz-shape .dz-seg{flex-wrap:wrap; max-width:100%;}
   .dz-seg button{white-space:nowrap;}
+
+  /* ===================== LAYOUT: barra in alto, disegno con forma e riepilogo, prodotti con categorie in colonna ===================== */
+  .dz{padding:.7em 14px .8em;}
+  .cd-top{flex-shrink:0; display:flex; align-items:center; flex-wrap:wrap; gap:.6em 1em; margin-bottom:.7em; padding:.5em .6em .5em 1em; border-radius:18px; background:rgba(255,255,255,.88); box-shadow:0 1px 2px rgba(29,5,61,.06), 0 8px 24px rgba(29,5,61,.07);}
+  .cd-brand{font-family:var(--display); font-weight:900; font-size:1.2em; color:var(--purple); display:flex; align-items:center; gap:.55em; white-space:nowrap; letter-spacing:-.01em;}
+  .cd-name{display:flex; align-items:center; gap:.6em; flex:0 1 24em; min-width:13em;}
+  .cd-name span{font-size:.72em; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim);}
+  .cd-name .pc-name-input{flex:1; min-width:0; font-size:1em; font-weight:700; padding:.4em .8em; min-height:2.5em;}
+  .cd-sp{flex:1;}
+  .cd-view{display:flex; align-items:center; gap:.5em;}
+  .cd-view > span{font-size:.75em; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim);}
+  .cd-top > .pc-btn{min-height:2.7em; font-size:.95em; padding:.45em 1.1em;}
+  .dz-stagebox{min-height:0; min-width:0; display:flex; flex-direction:column; gap:.5em; padding:.7em .8em;}
+  .dz-stagebox .dz-shape{margin:0;}
+  .cd-chips{flex:none; display:flex; flex-wrap:wrap; gap:.4em; font-size:.82em; font-weight:700; color:var(--ink-dim);}
+  .cd-chips span{background:var(--bg-2); border-radius:99px; padding:.3em .85em; box-shadow:inset 0 0 0 1px var(--line);}
+  .cd-chips .ok{color:var(--purple);}
+  .cd-chips .warn{color:var(--red); background:var(--red-soft); box-shadow:none;}
+  .dz-lib{flex:1.4 1 0; flex-direction:row; gap:.7em;}
+  .dz-rec{flex:1 1 0;}
+  .cd-rail{flex:none; width:9.6em; display:flex; flex-direction:column; gap:.2em; overflow-y:auto; scrollbar-width:thin; padding-right:.2em; border-right:1px solid var(--line);}
+  .cd-rail .dz-tab{flex:none; display:flex; align-items:center; justify-content:space-between; gap:.4em; width:100%; min-height:2.45em; padding:.3em .7em; border:0; border-radius:.7em; background:transparent; background-image:none; box-shadow:none; color:var(--purple); font-size:.9em; font-weight:700; text-align:left; white-space:nowrap;}
+  .cd-rail .dz-tab:hover{background:var(--purple-soft);}
+  .cd-rail .dz-tab[aria-selected="true"]{background:var(--purple); background-image:none; color:#fff; box-shadow:0 3px 10px rgba(29,5,61,.25);}
+  .cd-rail .dz-tab b{position:static; margin:0; min-width:1.6em; line-height:1.6em; padding:0 .4em; border-radius:99px; text-align:center; box-shadow:none; font-size:.8em;}
+  .cd-libmain{flex:1; min-width:0; min-height:0; display:flex; flex-direction:column; gap:.45em;}
+  .dz-layers{--rs:1; display:block; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; padding-right:.3em;}
+  .dz-layers .dz-layer{padding:.4em 0;}
+  @media (orientation:portrait){
+    .dz-bench{grid-template-rows:minmax(0,1fr) minmax(0,1.15fr);}
+    .dz-side{flex-direction:column;}
+  }
+  @media (orientation:portrait), (max-width:900px){
+    .dz-lib{flex-direction:column;}
+    .cd-rail{flex-direction:row; width:auto; overflow-x:auto; overflow-y:hidden; border-right:0; border-bottom:1px solid var(--line); padding:0 0 .35em;}
+    .cd-rail .dz-tab{width:auto;}
+  }
+  @media (max-width:640px){
+    .cd-name{flex:1 1 100%; order:5;}
+    .dz-layers{overflow:visible;}
+    .cd-rail{flex-wrap:wrap;}
+  }
 </style>
 </head>
 <body>
@@ -642,7 +657,8 @@
     const U=layers.reduce((a,l)=>a+l.thick*grow(l),0);
     let hsum=0; for(let i=0;i<T;i++) hsum+=HS[i];
     const uh=U?Math.min(S*.026,(S*.25)/(U*hsum)):0; // altezza per unità di spessore (dimezzata)
-    const yPlate=S*.86, prx=rx0+S*.06;
+    // centra in verticale: altezza dei piani + spazio per le decorazioni sopra
+    const cakeH=layers.length?U*uh*hsum+rx0*.24+S*.1:S*.3, yPlate=Math.min(S*.86,S*.5+cakeH/2), prx=rx0+S*.06;
     drawPlate(ctx,S,cx,yPlate,prx,sq?prx*.2:prx*.24);
     if(!layers.length){
       const rx=rx0, ry=sq?0:rx*.24, yb=yPlate, yt=yb-S*.2;
@@ -794,8 +810,9 @@
     muffin:{n:16, a:'rgba(246,241,250,.9)', b:'rgba(246,241,250,.5)', line:'rgba(120,90,170,.35)', edge:'rgba(120,90,170,.6)'},
     panettone:{n:26, a:'rgba(122,74,38,.93)', b:'rgba(122,74,38,.62)', line:'rgba(214,170,80,.55)', edge:'rgba(90,50,20,.85)', gold:true},
   };
+  const BAKED_H = {muffin:.46, panettone:.48, pandoro:.535, pagnotta:.34, bun:.22, loaf:.34}; // altezza della sagoma (in S) per centrarla
   function bakedGeom(S,shape){
-    const cx=S/2, yPlate=S*.86;
+    const cx=S/2, yPlate=Math.min(S*.86,S*.5+S*((BAKED_H[shape]||.34)+.1)/2);
     if(shape==="muffin"||shape==="panettone"){
       const pan=shape==="panettone";
       const bw=pan?S*.19:S*.16, tw=pan?S*.19:S*.205, dw=pan?S*.205:S*.27, ch=pan?S*.33:S*.25, dh=pan?S*.15:S*.21, yb=yPlate-S*.004, yc=yb-ch;
@@ -989,7 +1006,6 @@
   const hasTiers = r => r.shape==="round"||r.shape==="square";
   // pesi riferiti a un piano Ø 24 cm: plumcake ≈ stampo 30 cm, muffin = un pezzo, panettone ≈ 1 kg
   const tierFactor = r => r.shape==="loaf" ? .6 : r.shape==="muffin" ? .08 : r.shape==="panettone"||r.shape==="pandoro" ? .9 : r.shape==="pagnotta" ? .5 : r.shape==="bun" ? .08 : [1,.49,.23].slice(0,r.tiers||1).reduce((a,b)=>a+b,0);
-  const cakeTitle = () => (cake.name||"").trim() || "Nuova torta";
 
   let toastT=0;
   function toast(msg){ const t=$("#dz-toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,3200); }
@@ -1063,48 +1079,57 @@
   }
   function shapeHtml(){
     const r=cake.recipe;
-    return `<span>Vista</span><div class="dz-seg">${[["out","Esterno"],["in","Interno"]].map(([v,l])=>`<button data-act="dz-view" data-v="${v}" aria-pressed="${viewMode===v}">${l}</button>`).join("")}</div>
-      <span>Forma</span><div class="dz-seg">${SHAPES.map(([v,l])=>`<button data-act="dz-shape" data-v="${v}" aria-pressed="${r.shape===v}">${l}</button>`).join("")}</div>
+    return `<span>Forma</span><div class="dz-seg">${SHAPES.map(([v,l])=>`<button data-act="dz-shape" data-v="${v}" aria-pressed="${r.shape===v}">${l}</button>`).join("")}</div>
       ${hasTiers(r)?`<span>Piani</span><div class="dz-seg">${[1,2,3].map(n=>`<button data-act="dz-tiers" data-v="${n}" aria-pressed="${(r.tiers||1)===n}">${n}</button>`).join("")}</div>`:""}`;
   }
-  function footerHtml(){
+  const viewHtml = () => `<span>Vista</span><div class="dz-seg">${[["out","Esterno"],["in","Interno"]].map(([v,l])=>`<button data-act="dz-view" data-v="${v}" aria-pressed="${viewMode===v}">${l}</button>`).join("")}</div>`;
+  // riepilogo in etichette sotto il disegno
+  function chipsHtml(){
     const st=recipeStats(cake.recipe);
-    return `<div class="pc-footer-stats">
-        <div><span class="pc-footer-count">${st.layers}</span> <span class="pc-footer-note">strati · ${st.decoTypes} decorazioni · ${st.pieces} pezzi${st.mixTypes?` · ${st.mixTypes} nell'impasto`:""}</span></div>
-        <div class="pc-footer-note ${st.bases?"ok":"warn"}">${st.bases?"✓ impasto presente":"manca un impasto"}</div>
-        <div class="pc-footer-note ${st.hasCoat?"ok":""}">${st.hasCoat?"✓ copertura":"senza copertura"}</div>
-      </div>
-      <div class="pc-footer-btns"><button class="pc-btn primary" data-act="dz-pdf">⬇ Scheda PDF</button></div>`;
+    return `<span class="ok">${st.layers} ${st.layers===1?"strato":"strati"}</span>
+      <span>${st.decoTypes} decorazioni · ${st.pieces} pezzi</span>
+      ${st.mixTypes?`<span>${st.mixTypes} nell'impasto</span>`:""}
+      <span class="${st.bases?"ok":"warn"}">${st.bases?"✓ impasto":"manca un impasto"}</span>
+      <span class="${st.hasCoat?"ok":""}">${st.hasCoat?"✓ copertura":"senza copertura"}</span>`;
   }
+  // Layout: barra in alto (marchio, nome, vista, PDF) · a sinistra forma/piani, disegno e riepilogo ·
+  // a destra prodotti (categorie in colonna + riquadri) sopra l'elenco "La torta", che scorre
   function render(){
     root.innerHTML=`
       <div class="pc-team-bg dz">
-        <div class="dz-head">
-          <div class="dz-idblock"><div><div class="pc-eyebrow">Zeelandia · progettazione torta</div><div class="pc-title" id="dz-title">${escapeHtml(cakeTitle())}</div></div></div>
-          <div class="dz-fields"><label><span class="pc-field-label">Nome della torta</span><input class="pc-name-input" id="cake-name" value="${escapeHtml(cake.name)}" placeholder="es. Sogno di Bosco" maxlength="40" /></label></div>
-        </div>
+        <header class="cd-top">
+          <div class="cd-brand"><span class="pc-brand-mark"></span>Zeelandia Cake Designer</div>
+          <label class="cd-name"><span>Torta</span><input class="pc-name-input" id="cake-name" value="${escapeHtml(cake.name)}" placeholder="es. Sogno di Bosco" maxlength="40" /></label>
+          <div class="cd-sp"></div>
+          <div class="cd-view" id="dz-view">${viewHtml()}</div>
+          <button class="pc-btn primary" data-act="dz-pdf">⬇ Scheda PDF</button>
+        </header>
         <div class="dz-bench">
-          <div class="dz-stage"><canvas id="dz-cv" width="1200" height="1200" role="img" aria-label="Disegno della torta"></canvas></div>
+          <section class="dz-stagebox" aria-label="Disegno">
+            <div class="dz-shape" id="dz-shape">${shapeHtml()}</div>
+            <div class="dz-stage"><canvas id="dz-cv" width="1200" height="1200" role="img" aria-label="Disegno della torta"></canvas></div>
+            <div class="cd-chips" id="dz-chips">${chipsHtml()}</div>
+          </section>
           <div class="dz-side">
             <section class="dz-box dz-lib" aria-label="Prodotti">
-              <div class="dz-tabs" role="tablist" id="dz-tabs">${tabsHtml()}</div>
-              <p class="dz-note" id="dz-note"></p>
-              <div class="dz-tiles" id="dz-tiles">${tilesHtml()}</div>
+              <nav class="cd-rail" role="tablist" id="dz-tabs">${tabsHtml()}</nav>
+              <div class="cd-libmain">
+                <p class="dz-note" id="dz-note"></p>
+                <div class="dz-tiles" id="dz-tiles">${tilesHtml()}</div>
+              </div>
             </section>
             <section class="dz-box dz-rec" aria-label="La torta">
               <div class="dz-rechead"><h3>La torta</h3>
                 <button class="pc-btn ghost small" data-act="dz-shuffle">Mescola</button>
                 <button class="pc-btn ghost small" data-act="dz-clear" id="dz-clear">Svuota</button>
               </div>
-              <div class="dz-shape" id="dz-shape">${shapeHtml()}</div>
               <ul class="dz-layers" id="dz-layers">${layersHtml()}</ul>
             </section>
           </div>
         </div>
-        <div class="pc-recipe-footer" id="dz-footer">${footerHtml()}</div>
       </div>`;
     const [nc,nt]=noteHtml(); const n=$("#dz-note"); n.className="dz-note "+nc; n.textContent=nt;
-    drawCakeCanvas(); scheduleFit();
+    drawCakeCanvas();
   }
   let lastPicked=null, newLayerId=null, cakeAnim=null, animRaf=0, decoHits=[];
   function drawCakeCanvas(){
@@ -1127,11 +1152,10 @@
     const tl=$("#dz-tiles"), sc=tl.scrollTop; tl.innerHTML=tilesHtml(); tl.scrollTop=sc;
     const [nc,nt]=noteHtml(); const n=$("#dz-note"); n.className="dz-note "+nc; n.textContent=nt;
     $("#dz-shape").innerHTML=shapeHtml();
+    $("#dz-view").innerHTML=viewHtml();
     $("#dz-layers").innerHTML=layersHtml();
-    const prevCount=($(".pc-footer-count")||{}).textContent;
-    $("#dz-footer").innerHTML=footerHtml();
-    const fc=$(".pc-footer-count"); if(fc&&prevCount&&fc.textContent!==prevCount) fc.classList.add("bump");
-    drawCakeCanvas(); scheduleFit();
+    $("#dz-chips").innerHTML=chipsHtml();
+    drawCakeCanvas();
     lastPicked=null; newLayerId=null;
   }
 
@@ -1174,28 +1198,6 @@
     if(!clearArm){ btn.textContent="Tocca per confermare"; btn.classList.add("armed"); clearArm=setTimeout(resetClear,3000); return; }
     resetClear(); r.layers=[]; r.coat=null; r.decos=[]; r.mix=[]; activeCat="impasti"; refreshDesigner(); toast("Torta svuotata.");
   }
-
-  // ---- adatta l'elenco "La torta" al riquadro ----
-  function fitVar(el,name,max,min){
-    const fits=v=>{ el.style.setProperty(name,v); return el.scrollHeight<=el.clientHeight+1; };
-    if(fits(max)) return;
-    const steps=[max]; let v=max; while(v>min){ v=Math.round((v-.04)*100)/100; steps.push(v); }
-    if(steps.length===1) return;
-    let lo=1, hi=steps.length-1;
-    while(lo<hi){ const mid=(lo+hi)>>1; if(fits(steps[mid])) hi=mid; else lo=mid+1; }
-    el.style.setProperty(name,steps[lo]);
-  }
-  function fitAll(){
-    const layers=$("#dz-layers"); if(!layers) return;
-    if(window.matchMedia("(max-width:640px)").matches){ layers.className="dz-layers"; layers.style.setProperty("--rs",1); return; }
-    const ok=()=>layers.scrollHeight<=layers.clientHeight+1;
-    for(const [c,mx,mn] of [[1,1.08,.5],[2,.95,.45]]){ layers.className="dz-layers"+(c>1?" c"+c:""); fitVar(layers,"--rs",mx,mn); if(ok()) break; }
-    if(layers.classList.contains("c2")||parseFloat(layers.style.getPropertyValue("--rs"))<.85) layers.classList.add("tight");
-  }
-  let fitRaf=0;
-  function scheduleFit(){ if(fitRaf) return; fitRaf=requestAnimationFrame(()=>{ fitRaf=0; fitAll(); }); }
-  window.addEventListener("resize",scheduleFit);
-  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(scheduleFit);
 
   // ---- scheda prodotto: usa come… + dimensioni e pesi ----
   function openSheet(id){
@@ -1327,7 +1329,7 @@
   document.addEventListener("input", e=>{
     const t=e.target;
     if(t.dataset.field==="coatpct"){ cake.recipe.coatPct=+t.value; t.nextElementSibling.textContent=t.value+"%"; if(!dragRaf) dragRaf=requestAnimationFrame(()=>{ dragRaf=0; drawCakeCanvas(); }); return; }
-    if(t.id==="cake-name"){ cake.name=t.value; $("#dz-title").textContent=cakeTitle(); return; }
+    if(t.id==="cake-name"){ cake.name=t.value; return; }
     if(sheetIng&&t.dataset.field==="size"){ metaOf(sheetIng).size=+t.value; t.nextElementSibling.textContent=t.value+"%"; drawCakeCanvas(); return; }
     if(sheetIng&&/^w(Layer|Coat|Deco)$/.test(t.dataset.field||"")){ metaOf(sheetIng)[t.dataset.field]=Math.max(0,parseFloat(t.value)||0); return; }
   });
