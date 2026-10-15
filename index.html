@@ -411,7 +411,7 @@
       G("Chocolatier – creme spalmabili",{kind:"spread",alt:["coat"],ck:"choc"},[
         ["ch_pistacchio18","Chocolatier Crema Pistacchio 18%","#A7B860"],["ch_nocciola","Chocolatier Nocciola","#6B3E22"],["ch_bianca","Chocolatier Bianca","#F4EAD2"],
         ["ch_nocciola_bianca","Chocolatier Nocciola Bianca","#E5CFA6"],["ch_bio","Chocolatier Nocciola senza lattosio Bio","#70442A"],
-        ["ch_pistacchio15","Chocolatier Pistacchio 15%","#B4C273"],["ch_profi","Chocolatier Profì","#3A1F14"]]),
+        ["ch_pistacchio15","Chocolatier Pistacchio 15%","#B4C273"],["ch_profi","Chocolatier Profì","#3A1F14",null,null,{tint:true,alt:["coat"]}]]),
       G("Casa Luker – cioccolato fino de aroma",{alt:["coat","deco"],ck:"choc",dk:"curl"},[
         ["caribe","Caribe Latte 45%","#7B4A2C"],["glaciar","Glaciar 35%","#F1E4C6"],["gocce_misterio","Gocce Misterio 58%","#3F2216","drop","deco",{alt:["coat"]}],
         ["huila","Huila 70%","#33190F"],["macondo","Macondo 60%","#3E2014"],["nevado","Nevado 36,5%","#F5EBD3"],
@@ -454,7 +454,7 @@
       const d = Object.assign({}, def, gr.def, extra||{});
       const myRole = role || d.role;
       const alt = extra && extra.alt ? extra.alt : [...new Set([...(d.alt||[]), d.role])].filter(x=>x!==myRole);
-      INGREDIENTS[key].items.push({id, n, g:gr.name, col, kind:kind||d.kind, role:myRole, alt, drole:d.role, dkind:d.kind, lk:d.lk, ck:d.ck, dk:d.dk});
+      INGREDIENTS[key].items.push({id, n, g:gr.name, col, kind:kind||d.kind, role:myRole, alt, drole:d.role, dkind:d.kind, lk:d.lk, ck:d.ck, dk:d.dk, tint:!!(extra&&extra.tint)});
     }));
   });
 
@@ -474,7 +474,17 @@
     if(!it||![it.role].concat(it.alt||[]).includes("deco")) return null;
     const k=kindFor(it,"deco"); return PIECE_ARTS.has(k) ? k : k==="curl" ? "cube" : null; // cioccolato in tavoletta → pezzetti
   }
-  const rolesOf = it => { const ro=[it.role].concat(it.alt||[]); return mixArtOf(it) ? ro.concat("mix") : ro; };
+  // "nell'impasto": pezzi visibili in sezione, oppure (tint) una crema che colora l'impasto base, es. Profì → impasto al cioccolato
+  const canMix = it => !!(it&&(it.tint||mixArtOf(it)));
+  const rolesOf = it => { const ro=[it.role].concat(it.alt||[]); return canMix(it) ? ro.concat("mix") : ro; };
+  function mixHex(a,b,k){ const A=rgbOf(a), Bc=rgbOf(b); return "#"+A.map((v,i)=>Math.round(v+(Bc[i]-v)*k).toString(16).padStart(2,"0")).join(""); }
+  const TINT_MAX = 5, TINT_G = 25; // grammi di crema per livello di intensità (torta Ø 24 cm)
+  // colore di uno strato, scurito dalle creme "tint" messe nell'impasto (solo strati base)
+  function layerCol(r,l){
+    let c=ITEM[l.ingId].col;
+    (r.mix||[]).forEach(m=>{ const it=ITEM[m.ingId]; if(it&&it.tint&&mixLayer(r,m)===l) c=mixHex(c,it.col,.35+.1*Math.min(TINT_MAX,m.count)); });
+    return c;
+  }
   function kindFor(it, role){
     if(role===it.role) return it.kind;
     if(role===it.drole && it.dkind) return it.dkind;
@@ -618,7 +628,7 @@
   const ease = t => 1-Math.pow(1-Math.max(0,Math.min(1,t)),3);
 
   function drawCake(ctx,S,r,opts={}){
-    if(["loaf","muffin","panettone","pagnotta","bun"].includes(r.shape)) return drawBaked(ctx,S,r,opts);
+    if(["loaf","muffin","panettone","pandoro","pagnotta","bun"].includes(r.shape)) return drawBaked(ctx,S,r,opts);
     const an=opts.anim||null, u=S/400, cx=S/2, sq=r.shape==="square", inside=!!opts.interior;
     ctx.clearRect(0,0,S,S);
     if(opts.bg){ ctx.fillStyle=opts.bg; ctx.fillRect(0,0,S,S); }
@@ -652,7 +662,7 @@
       layers.forEach(l=>{
         const it=ITEM[l.ingId], h=l.thick*uh*HS[i]*grow(l); if(h<=.2) return;
         ctx.save(); bodyPath(ctx,cx,y,y-h,rx,ry,sq); ctx.clip();
-        fillTex(ctx,kindFor(it,"layer"),it.col,cx-rx,y-h-ry,cx+rx,y+ry+1,l.seed+i,u);
+        fillTex(ctx,kindFor(it,"layer"),layerCol(r,l),cx-rx,y-h-ry,cx+rx,y+ry+1,l.seed+i,u);
         ctx.restore();
         const yy=y; (bands[l.id]||(bands[l.id]=[])).push({x0:cx-rx,x1:cx+rx,y0:yy-h,y1:yy,off:arc,clip:()=>bodyPath(ctx,cx,yy,yy-h,rx,ry,sq)});
         y-=h;
@@ -664,7 +674,7 @@
       const capY=yt-rim, crx=rx+rim, cry=sq?0:ry*(crx/rx);
       const topL=layers[layers.length-1], topIt=ITEM[topL.ingId];
       ctx.save(); topPath(ctx,cx,capY,crx,cry,sq); ctx.clip();
-      fillTex(ctx,kindFor(topIt,"layer"),topIt.col,cx-crx,capY-crx,cx+crx,capY+crx,topL.seed+99,u);
+      fillTex(ctx,kindFor(topIt,"layer"),layerCol(r,topL),cx-crx,capY-crx,cx+crx,capY+crx,topL.seed+99,u);
       ctx.fillStyle='rgba(255,255,255,.14)'; ctx.fillRect(cx-crx,capY-crx,crx*2,crx*2);
       if(coat){
         ctx.globalAlpha=coatA;
@@ -756,11 +766,16 @@
 
   // ---- inclusioni nell'impasto (solo vista interna) ----
   function defaultMixLayer(ls){ for(let k=ls.length-1;k>=0;k--) if(BASE_KINDS.has(kindFor(ITEM[ls[k].ingId],"layer"))) return ls[k]; return ls[ls.length-1]; }
-  function mixLayer(r,m){ const ls=r.layers.filter(l=>ITEM[l.ingId]); return ls.find(l=>l.id===m.layer) || defaultMixLayer(ls); }
+  const isBaseLayer = l => BASE_KINDS.has(kindFor(ITEM[l.ingId],"layer"));
+  function mixLayer(r,m){
+    let ls=r.layers.filter(l=>ITEM[l.ingId]);
+    if(ITEM[m.ingId]&&ITEM[m.ingId].tint){ ls=ls.filter(isBaseLayer); if(!ls.length) return null; }
+    return ls.find(l=>l.id===m.layer) || defaultMixLayer(ls);
+  }
   // bands[layerId] = [{x0,x1,y0,y1,off(x),clip()}]: tratti dello strato visti in sezione
   function drawMix(ctx,r,bands,sizeRef,u){
     (r.mix||[]).filter(m=>ITEM[m.ingId]).forEach(m=>{
-      const L=mixLayer(r,m), it=ITEM[m.ingId], art=mixArtOf(it); if(!L||!art) return;
+      const L=mixLayer(r,m), it=ITEM[m.ingId], art=mixArtOf(it); if(!L||!art||it.tint) return;
       const img=getDecoArt(art,it.col), size=art===kindFor(it,"deco")?metaOf(m.ingId).size:DECO_DEF[art][0];
       (bands[L.id]||[]).forEach((b,bi)=>{
         const rnd=rng(m.seed+bi*977), w=b.x1-b.x0, h=b.y1-b.y0, dia=Math.min(sizeRef*size/100*1.1,h*1.3), n=Math.max(1,Math.round(m.count*w/sizeRef));
@@ -799,6 +814,15 @@
           g.quadraticCurveTo(cx+rx*1.02,yb,cx+rx*.8,yb); g.closePath(); },
         topY:x=>yb-Ht*Math.pow(Math.max(0,1-Math.pow(Math.abs(x-cx)/rx,2.2)),.55) };
     }
+    if(shape==="pandoro"){ // stella a 8 punte vista di lato: tronco di cono alto, con spigoli verticali
+      const bw=S*.29, tw=S*.115, H=S*.5, dh=S*.035, yb=yPlate-S*.004, yt=yb-H;
+      const halfAt=y=>tw+(bw-tw)*Math.pow(Math.max(0,Math.min(1,(y-yt)/H)),.8);
+      return {cupped:false, crack:null, facets:8, crustW:5, crustK:-.35, crustCol:'#B87A2E', cx, yPlate, yb, yc:yt, half:bw, top:yt-dh, Htot:H+dh, dh, H, prx:bw+S*.07, halfAt, bw, tw,
+        sil(g){ g.beginPath(); g.moveTo(cx-bw,yb); for(let k=1;k<=20;k++){ const y=yb-H*k/20; g.lineTo(cx-halfAt(y),y); }
+          g.quadraticCurveTo(cx-tw*.6,yt-dh*1.2,cx,yt-dh); g.quadraticCurveTo(cx+tw*.6,yt-dh*1.2,cx+tw,yt);
+          for(let k=19;k>=0;k--){ const y=yb-H*k/20; g.lineTo(cx+halfAt(y),y); } g.closePath(); },
+        topY:x=>yt-dh*Math.max(0,1-Math.pow((x-cx)/tw,2)) };
+    }
     const rx=S*.4, bw=rx*.93, H=S*.27, dh=S*.07, yb=yPlate, yt=yb-H;
     return {cupped:false, crack:"crack", crustW:5, crustK:-.35, cx, yPlate, yb, yc:yt, half:rx, top:yt-dh, Htot:H+dh, dh, H, prx:S*.46,
       sil(g){ g.beginPath(); g.moveTo(cx-bw,yb); g.lineTo(cx-rx,yt); g.bezierCurveTo(cx-rx,yt-dh*.78,cx-rx*.45,yt-dh,cx,yt-dh);
@@ -829,7 +853,7 @@
       const it=ITEM[l.ingId], h=l.thick*grow(l)/U*G.Htot, last=k===layers.length-1;
       if(h<=.2&&!last) return;
       const y0=last?G.top-u*4:y-h, y1=y+1, x0=cx-G.half-2, x1=cx+G.half+2;
-      fillTex(ctx,kindFor(it,"layer"),it.col,x0,y0,x1,y1,l.seed,u);
+      fillTex(ctx,kindFor(it,"layer"),layerCol(r,l),x0,y0,x1,y1,l.seed,u);
       bands[l.id]=[{x0,x1,y0:last?G.top+G.dh*.15:y0,y1,off:()=>0,clip:()=>{ ctx.beginPath(); ctx.rect(x0,y0,x1-x0,y1-y0); }}];
       y-=h;
     });
@@ -838,9 +862,19 @@
     sh.addColorStop(0,'rgba(0,0,0,.18)'); sh.addColorStop(.3,'rgba(255,255,255,.06)'); sh.addColorStop(.7,'rgba(0,0,0,.02)'); sh.addColorStop(1,'rgba(0,0,0,.22)');
     ctx.fillStyle=sh; ctx.fillRect(0,0,S,S);
     // crosta cotta sulla cupola (senza copertura piena)
-    const topIt=ITEM[layers[layers.length-1].ingId], crust=G.crustCol||tone(topIt.col,G.crustK,.9);
+    const topCol=layerCol(r,layers[layers.length-1]), topIt={col:topCol}, crust=G.crustCol||tone(topCol,G.crustK,.9);
     if(G.crustCol){ G.sil(ctx); ctx.lineWidth=u*26; ctx.strokeStyle='rgba(150,78,26,.38)'; ctx.stroke(); } // doratura della cupola
     G.sil(ctx); ctx.lineWidth=u*G.crustW; ctx.strokeStyle=crust; ctx.stroke();
+    if(G.facets&&!inside){ // spigoli della stella: facce alterne chiare e scure che convergono in cima
+      const n=G.facets;
+      for(let k=0;k<n;k++){
+        const a0=k/n, a1=(k+1)/n, xb0=cx-G.bw+a0*G.bw*2, xb1=cx-G.bw+a1*G.bw*2, xt0=cx-G.tw+a0*G.tw*2, xt1=cx-G.tw+a1*G.tw*2;
+        ctx.beginPath(); ctx.moveTo(xb0,G.yb); ctx.lineTo(xt0,G.yc); ctx.lineTo(xt1,G.yc); ctx.lineTo(xb1,G.yb); ctx.closePath();
+        ctx.fillStyle=k%2?'rgba(120,64,18,.42)':'rgba(255,214,140,.32)'; ctx.fill();
+        ctx.strokeStyle='rgba(110,58,16,.55)'; ctx.lineWidth=u*1.4; ctx.beginPath(); ctx.moveTo(xb0,G.yb); ctx.lineTo(xt0,G.yc); ctx.stroke();
+      }
+      const gl=ctx.createLinearGradient(0,G.top,0,G.yb); gl.addColorStop(0,'rgba(150,80,20,.35)'); gl.addColorStop(.35,'rgba(150,80,20,0)'); ctx.fillStyle=gl; ctx.fillRect(0,0,S,S);
+    }
     if(G.crack==="slash"){ ctx.lineCap='round'; // tagli sulla crosta della pagnotta
       [-.42,0,.42].forEach(f=>{ const x=cx+f*G.half, y0=G.topY(x)+u*6; ctx.beginPath(); ctx.moveTo(x-G.half*.13,y0+u*7); ctx.quadraticCurveTo(x,y0-u*3,x+G.half*.13,y0+u*7);
         ctx.lineWidth=u*8; ctx.strokeStyle='rgba(246,232,204,.95)'; ctx.stroke(); ctx.lineWidth=u*2.2; ctx.strokeStyle=tone(topIt.col,-.5,.85); ctx.stroke(); }); }
@@ -883,7 +917,7 @@
       if(!inside&&ck!=="dust"&&ck!=="fondant"&&ck!=="almondglaze"){ ctx.fillStyle='rgba(255,255,255,.45)'; ctx.beginPath(); ctx.ellipse(cx-G.half*.32,G.topY(cx-G.half*.32)+u*5,G.half*.2,u*2.6,-.12,0,7); ctx.fill(); }
       ctx.restore();
       if(!inside&&(ck==="glaze"||ck==="choc"||ck==="gel")){
-        const rr=rng(31), w=muf?G.half*.95:G.half, n=Math.round(7+w/(u*7)), dw=u*(ck==="gel"?2.2:3.2), maxL=muf?G.dh*.55:Math.min(G.H*.4,G.yb-capB);
+        const rr=rng(31), w=G.halfAt?G.halfAt(capB):muf?G.half*.95:G.half, n=Math.round(7+w/(u*7)), dw=u*(ck==="gel"?2.2:3.2), maxL=muf?G.dh*.55:Math.min(G.H*.4,G.yb-capB);
         ctx.save(); ctx.globalAlpha=coatA*(ck==="gel"?.75:1); ctx.fillStyle=ck==="gel"?tone(coat.col,0,.8):coat.col;
         if(maxL>u*2) for(let k=0;k<n;k++){ const x=cx-w+(k+.5)/n*w*2, base=capB-u*2, len=(rr()*.8+.15)*maxL*coatA;
           ctx.beginPath(); ctx.moveTo(x-dw*1.6,base); ctx.lineTo(x-dw,base+len-dw); ctx.arc(x,base+len-dw,dw,Math.PI,0,true); ctx.lineTo(x+dw*1.6,base); ctx.closePath(); ctx.fill(); }
@@ -891,9 +925,10 @@
       }
     }
     const lift=coat&&RIM_COATS.has(ck)?u*4:0;
-    drawDecos(ctx,S,r,an,G.half*2,(rnd,dia,i,art,t)=>{
+    const topHalf=G.tw&&!muf?G.tw:G.half; // pandoro: le decorazioni stanno sulla cima stretta
+    drawDecos(ctx,S,r,an,topHalf===G.half?G.half*2:topHalf*2.6,(rnd,dia,i,art,t)=>{
       if(art==="plaque"&&i===0&&t===0) return {x:cx, y:G.topY(cx)+G.dh*.12-lift};
-      const x=cx+(rnd()*2-1)*Math.max(0,G.half*(muf?.72:.82)-dia*.3);
+      const x=cx+(rnd()*2-1)*Math.max(0,topHalf*(muf?.72:.82)-dia*.3);
       return {x, y:G.topY(x)+rnd()*G.dh*(muf?.22:.3)+u*2-lift};
     },{x:cx, y:G.topY(cx)},opts.hits);
   }
@@ -949,11 +984,11 @@
     return { layers:ls.length, bases:ls.filter(l=>BASE_KINDS.has(kindFor(ITEM[l.ingId],"layer"))).length, decoTypes:ds.length,
       pieces:ds.reduce((a,d)=>a+d.count,0), hasCoat:!!(r.coat&&ITEM[r.coat]), mixTypes:(r.mix||[]).filter(m=>ITEM[m.ingId]).length };
   }
-  const SHAPES = [["round","● Rotonda"],["square","■ Quadrata"],["loaf","Plumcake"],["muffin","Muffin"],["panettone","Panettone"],["pagnotta","Pagnotta"],["bun","Buns"]];
-  const SHAPE_NAME = {round:"Rotonda", square:"Quadrata", loaf:"Plumcake", muffin:"Muffin", panettone:"Panettone", pagnotta:"Pagnotta", bun:"Bun"};
+  const SHAPES = [["round","● Rotonda"],["square","■ Quadrata"],["loaf","Plumcake"],["muffin","Muffin"],["panettone","Panettone"],["pandoro","Pandoro"],["pagnotta","Pagnotta"],["bun","Buns"]];
+  const SHAPE_NAME = {round:"Rotonda", square:"Quadrata", loaf:"Plumcake", muffin:"Muffin", panettone:"Panettone", pandoro:"Pandoro", pagnotta:"Pagnotta", bun:"Bun"};
   const hasTiers = r => r.shape==="round"||r.shape==="square";
   // pesi riferiti a un piano Ø 24 cm: plumcake ≈ stampo 30 cm, muffin = un pezzo, panettone ≈ 1 kg
-  const tierFactor = r => r.shape==="loaf" ? .6 : r.shape==="muffin" ? .08 : r.shape==="panettone" ? .9 : r.shape==="pagnotta" ? .5 : r.shape==="bun" ? .08 : [1,.49,.23].slice(0,r.tiers||1).reduce((a,b)=>a+b,0);
+  const tierFactor = r => r.shape==="loaf" ? .6 : r.shape==="muffin" ? .08 : r.shape==="panettone"||r.shape==="pandoro" ? .9 : r.shape==="pagnotta" ? .5 : r.shape==="bun" ? .08 : [1,.49,.23].slice(0,r.tiers||1).reduce((a,b)=>a+b,0);
   const cakeTitle = () => (cake.name||"").trim() || "Nuova torta";
 
   let toastT=0;
@@ -974,7 +1009,7 @@
     const r=cake.recipe; let lastG=null;
     return INGREDIENTS[activeCat].items.map((it,idx)=>{
       const head=it.g!==lastG?`<div class="dz-group">${escapeHtml(it.g)}</div>`:""; lastG=it.g;
-      const sel=r.coat===it.id, n=usedCount(r,it.id), tapRole=viewMode==="in"&&mixArtOf(it)?"mix":it.role;
+      const sel=r.coat===it.id, n=usedCount(r,it.id), tapRole=viewMode==="in"&&canMix(it)?"mix":it.role;
       return head+`<div class="dz-tile ${sel?"sel":""} ${n?"on":""} ${lastPicked===it.id?"pop":""}" style="--i:${idx}">
           <button class="dz-tbtn" data-act="dz-pick" data-id="${it.id}" aria-label="${ROLE_LABEL[tapRole]}: ${escapeHtml(it.n)}"><span class="dz-thumb">${thumbImg(it.id)}</span><span class="dz-tn">${escapeHtml(it.n)}</span></button>
           <span class="dz-role">${ROLE_LABEL[tapRole]}${rolesOf(it).length>1?" +":""}</span>
@@ -985,7 +1020,7 @@
   }
   function noteHtml(){
     const st=recipeStats(cake.recipe);
-    if(viewMode==="in"&&!["impasti","panettoni","senzaglutine","panificazione","coperture"].includes(activeCat)) return ["","Vista interna: tocca canditi, gocce, cubetti, frutta o croccante per metterli nell'impasto. Nell'elenco scegli in quale strato."];
+    if(viewMode==="in"&&!["impasti","panettoni","senzaglutine","panificazione","coperture"].includes(activeCat)) return ["","Vista interna: tocca canditi, gocce, cubetti, frutta o croccante per metterli nell'impasto (Profì lo rende al cioccolato). Nell'elenco scegli in quale strato."];
     if(activeCat==="impasti"||activeCat==="panettoni") return ["","Ogni tocco aggiunge uno strato in cima. Alterna impasti e farciture."];
     if(activeCat==="panificazione") return ["","Mix per pane Zeelandia: ogni tocco aggiunge uno strato. Prova le forme Pagnotta e Buns."];
     if(activeCat==="senzaglutine") return ["","Mix senza glutine Zeelandia: ogni tocco aggiunge uno strato in cima. Controlla che anche farciture e decorazioni siano adatte."];
@@ -1006,15 +1041,16 @@
         <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(nameOf(d.ingId))}">×</button>
       </li>`).join("");
     const ls=r.layers.filter(l=>ITEM[l.ingId]);
-    const layerOpts=m=>ls.slice().reverse().map((l,k)=>`<option value="${l.id}" ${mixLayer(r,m)===l?"selected":""}>Strato ${ls.length-k} · ${escapeHtml(nameOf(l.ingId))}</option>`).join("");
-    const mixes=(r.mix||[]).filter(m=>ITEM[m.ingId]).map(m=>`
+    const layerOpts=m=>ls.slice().reverse().map((l,k)=>({l,n:ls.length-k})).filter(o=>!ITEM[m.ingId].tint||isBaseLayer(o.l))
+      .map(o=>`<option value="${o.l.id}" ${mixLayer(r,m)===o.l?"selected":""}>Strato ${o.n} · ${escapeHtml(nameOf(o.l.ingId))}</option>`).join("");
+    const mixes=(r.mix||[]).filter(m=>ITEM[m.ingId]).map(m=>{ const tint=ITEM[m.ingId].tint, opts=layerOpts(m); return `
       <li class="dz-layer ${m.id===newLayerId?"new":""}" data-mix="${m.id}">
         <span class="dz-thumb sm">${thumbImg(m.ingId)}</span>
-        <div class="dz-lname">${escapeHtml(nameOf(m.ingId))}<small>Nell'impasto · pezzi</small>${ls.length?`<select class="dz-mixsel" data-field="mixlayer" aria-label="Strato in cui metterlo">${layerOpts(m)}</select>`:""}</div>
-        <div class="dz-step"><button data-act="dz-dec" aria-label="Meno pezzi">−</button><input type="number" inputmode="numeric" min="1" max="99" value="${m.count}" data-field="count" aria-label="Pezzi di ${escapeHtml(nameOf(m.ingId))}"><button data-act="dz-inc" aria-label="Più pezzi">+</button></div>
-        <button class="dz-ibtn" data-act="dz-reshuffle" title="Rimescola" aria-label="Rimescola">⟳</button>
+        <div class="dz-lname">${escapeHtml(nameOf(m.ingId))}<small>${tint?"Impasto al cioccolato · intensità":"Nell'impasto · pezzi"}</small>${opts?`<select class="dz-mixsel" data-field="mixlayer" aria-label="Strato in cui metterlo">${opts}</select>`:`<small style="display:block;color:var(--red)">nessun impasto base</small>`}</div>
+        <div class="dz-step"><button data-act="dz-dec" aria-label="${tint?"Meno intenso":"Meno pezzi"}">−</button><input type="number" inputmode="numeric" min="1" max="${tint?TINT_MAX:99}" value="${m.count}" data-field="count" aria-label="${tint?"Intensità":"Pezzi"} di ${escapeHtml(nameOf(m.ingId))}"><button data-act="dz-inc" aria-label="${tint?"Più intenso":"Più pezzi"}">+</button></div>
+        ${tint?"":`<button class="dz-ibtn" data-act="dz-reshuffle" title="Rimescola" aria-label="Rimescola">⟳</button>`}
         <button class="dz-ibtn rm" data-act="dz-rm" title="Togli" aria-label="Togli ${escapeHtml(nameOf(m.ingId))}">×</button>
-      </li>`).join("");
+      </li>`; }).join("");
     const layers=ls.slice().reverse().map((l,k)=>{ const it=ITEM[l.ingId], lk=kindFor(it,"layer"); return `
       <li class="dz-layer ${l.id===newLayerId?"new":""}" data-layer="${l.id}">
         <span class="dz-thumb sm">${thumbImg(l.ingId)}</span>
@@ -1104,13 +1140,18 @@
     const r=cake.recipe, st=recipeStats(r), m=metaOf(id);
     lastPicked=id;
     if(role==="mix"){
-      const art=mixArtOf(ITEM[id]); if(!art) return;
+      const it=ITEM[id], art=mixArtOf(it); if(!art&&!it.tint) return;
       if(!st.layers){ toast("Aggiungi prima uno strato di impasto."); return; }
+      let note=null;
+      if(it.tint&&!st.bases){ toast("Aggiungi prima un impasto base: Profì lo trasforma in impasto al cioccolato."); return; }
       const ex=(r.mix||(r.mix=[])).find(x=>x.ingId===id);
-      if(ex) ex.count=Math.min(99,ex.count+Math.max(2,Math.round(DECO_DEF[art][1]/3)));
+      if(ex) ex.count=it.tint?Math.min(TINT_MAX,ex.count+1):Math.min(99,ex.count+Math.max(2,Math.round(DECO_DEF[art][1]/3)));
       else { if(st.mixTypes>=MAX_MIX){ toast(`Massimo ${MAX_MIX} prodotti nell'impasto. Togline uno prima.`); return; }
-        const x={id:uid(), ingId:id, count:DECO_DEF[art][1], seed:newSeed(), layer:defaultMixLayer(r.layers.filter(l=>ITEM[l.ingId])).id}; r.mix.push(x); newLayerId=x.id; }
+        const ls=r.layers.filter(l=>ITEM[l.ingId]), target=defaultMixLayer(it.tint?ls.filter(isBaseLayer):ls);
+        const x={id:uid(), ingId:id, count:it.tint?3:DECO_DEF[art][1], seed:newSeed(), layer:target.id}; r.mix.push(x); newLayerId=x.id;
+        if(it.tint) note=`${it.n}: "${nameOf(target.ingId)}" diventa un impasto al cioccolato.`; }
       if(viewMode!=="in"){ viewMode="in"; toast("Vista interna: ora vedi cosa c'è nell'impasto."); }
+      if(note) toast(note); // dopo l'avviso della vista interna, così resta visibile
       cakeAnim=null; refreshDesigner(); return;
     }
     if(role==="coat"){ r.coat=r.coat===id?null:id; cakeAnim=r.coat?{coat:0}:null; refreshDesigner(); return; }
@@ -1167,7 +1208,7 @@
       ${roles.includes("layer")?fld("Peso / strato","wLayer",m.wLayer,"g"):""}
       ${roles.includes("coat")?fld("Peso copertura 100%","wCoat",m.wCoat,"g"):""}
       ${roles.includes("deco")?fld("Peso / pezzo","wDeco",m.wDeco,"g"):""}
-      <p class="pc-settings-note" style="margin:0;">Pesi riferiti a una torta Ø 24 cm e spessore 1 (plumcake, muffin, panettone, pagnotta e bun in proporzione); compaiono nella scheda PDF.</p>`;
+      <p class="pc-settings-note" style="margin:0;">Pesi riferiti a una torta Ø 24 cm e spessore 1 (plumcake, muffin, panettone, pandoro, pagnotta e bun in proporzione); compaiono nella scheda PDF.</p>`;
     $("#dz-sheet").hidden=false;
   }
   function closeSheet(){ sheetIng=null; $("#dz-sheet").hidden=true; }
@@ -1222,8 +1263,8 @@
     if(r.coat&&ITEM[r.coat]){ const w=metaOf(r.coat).wCoat*tf*coatWeightK(r); grams+=w; row(r.coat,INGREDIENTS[catOf(r.coat)].label,"Copertura",Math.round(coatPct(r)*100)+"%",w>0?fmtNum(w,0):"-"); }
     r.decos.filter(d=>ITEM[d.ingId]).forEach(d=>{ const w=metaOf(d.ingId).wDeco*d.count; grams+=w; row(d.ingId,INGREDIENTS[catOf(d.ingId)].label,"Decorazione",d.count+" pz",w>0?fmtNum(w,0):"-"); });
     const ls=r.layers.filter(l=>ITEM[l.ingId]);
-    (r.mix||[]).filter(m=>ITEM[m.ingId]).forEach(m=>{ const L=mixLayer(r,m), w=metaOf(m.ingId).wDeco*m.count*tf; grams+=w;
-      row(m.ingId,INGREDIENTS[catOf(m.ingId)].label+(L?` · nello strato ${ls.length-ls.indexOf(L)}`:""),"Nell'impasto",m.count+" pz",w>0?fmtNum(w,0):"-"); });
+    (r.mix||[]).filter(m=>ITEM[m.ingId]).forEach(m=>{ const L=mixLayer(r,m), tint=ITEM[m.ingId].tint, w=(tint?TINT_G*m.count:metaOf(m.ingId).wDeco*m.count)*tf; grams+=w;
+      row(m.ingId,INGREDIENTS[catOf(m.ingId)].label+(L?` · nello strato ${ls.length-ls.indexOf(L)}`:""),tint?"Impasto al cioccolato":"Nell'impasto",tint?`intensità ${m.count}/${TINT_MAX}`:m.count+" pz",w>0?fmtNum(w,0):"-"); });
     ls.slice().reverse().forEach((l,k)=>{ const w=metaOf(l.ingId).wLayer*l.thick*tf; grams+=w; row(l.ingId,INGREDIENTS[catOf(l.ingId)].label,`Strato ${ls.length-k}`,"spess. "+l.thick,w>0?fmtNum(w,0):"-"); });
     if(!ls.length&&!r.coat&&!r.decos.length){ doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor(110,100,128); doc.text("Nessun prodotto scelto.",M+14,y+2); y+=RH; }
     if(y+RH>H-M-6){ doc.addPage(); y=M+4; }
@@ -1246,7 +1287,7 @@
     const act=b.dataset.act, id=b.dataset.id, r=cake.recipe;
     switch(act){
       case "dz-tab": activeCat=b.dataset.v; refreshDesigner(); animateTilesEnter(); return;
-      case "dz-pick": useAs(id,viewMode==="in"&&mixArtOf(ITEM[id])?"mix":ITEM[id].role); return;
+      case "dz-pick": useAs(id,viewMode==="in"&&canMix(ITEM[id])?"mix":ITEM[id].role); return;
       case "dz-view": viewMode=b.dataset.v; cakeAnim=null; refreshDesigner(); return;
       case "dz-adjust": openSheet(id); return;
       case "sheet-use": { const ing=sheetIng; closeSheet(); useAs(ing,b.dataset.role); return; }
@@ -1261,7 +1302,7 @@
     const li=b.closest("[data-layer]"), ld=b.closest("[data-deco]"), lm=b.closest("[data-mix]");
     if(lm){
       const m=(r.mix||[]).find(x=>x.id===lm.dataset.mix); if(!m) return;
-      if(act==="dz-inc") m.count=Math.min(99,m.count+1);
+      if(act==="dz-inc") m.count=Math.min(ITEM[m.ingId].tint?TINT_MAX:99,m.count+1);
       else if(act==="dz-dec") m.count=Math.max(1,m.count-1);
       else if(act==="dz-reshuffle") m.seed=newSeed();
       else if(act==="dz-rm") r.mix=r.mix.filter(x=>x!==m);
@@ -1294,7 +1335,7 @@
     const t=e.target;
     if(t.dataset.field!=="thick"&&t.dataset.field!=="count"&&t.dataset.field!=="mixlayer") return;
     const r=cake.recipe, li=t.closest("[data-layer]"), ld=t.closest("[data-deco]"), lm=t.closest("[data-mix]");
-    if(lm){ const m=(r.mix||[]).find(x=>x.id===lm.dataset.mix); if(m){ if(t.dataset.field==="mixlayer") m.layer=t.value; else m.count=Math.max(1,Math.min(99,parseInt(t.value,10)||1)); } }
+    if(lm){ const m=(r.mix||[]).find(x=>x.id===lm.dataset.mix); if(m){ if(t.dataset.field==="mixlayer") m.layer=t.value; else m.count=Math.max(1,Math.min(ITEM[m.ingId].tint?TINT_MAX:99,parseInt(t.value,10)||1)); } }
     if(li){ const L=r.layers.find(l=>l.id===li.dataset.layer); if(L) L.thick=Math.max(1,Math.min(6,parseInt(t.value,10)||1)); }
     if(ld){ const d=r.decos.find(x=>x.id===ld.dataset.deco); if(d) d.count=Math.max(1,Math.min(99,parseInt(t.value,10)||1)); }
     refreshDesigner();
