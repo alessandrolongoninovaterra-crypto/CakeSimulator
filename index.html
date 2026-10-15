@@ -460,9 +460,8 @@
     }));
   });
 
-  const ITEM = {}; let itemsVersion = 0;
+  const ITEM = {};
   function indexItems(){
-    itemsVersion++;
     Object.keys(ITEM).forEach(k => delete ITEM[k]);
     Object.entries(INGREDIENTS).forEach(([cat,c]) => c.items.forEach(it => { it.cat = cat; ITEM[it.id] = it; }));
   }
@@ -511,7 +510,6 @@
   // ===================== DISEGNO =====================
   function rgbOf(hex){ const n=parseInt(String(hex).slice(1),16); return [n>>16,(n>>8)&255,n&255]; }
   function tone(hex,k,a=1){ let [r,g,b]=rgbOf(hex); if(k<0){r*=1+k;g*=1+k;b*=1+k}else{r+=(255-r)*k;g+=(255-g)*k;b+=(255-b)*k} return `rgba(${r|0},${g|0},${b|0},${a})`; }
-  function hsl2hex(h,s,l){ s/=100;l/=100; const k=n=>(n+h/30)%12, a=s*Math.min(l,1-l), f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1)); return "#"+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,"0")).join(""); }
   function hashHue(s){let h=0;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))>>>0;return h%360}
   const D=(g,x,y,r,f)=>{g.fillStyle=f;g.beginPath();g.arc(x,y,r,0,7);g.fill()};
   function heartPath(g,cx,cy,s){ g.beginPath(); g.moveTo(cx,cy+s*.9); g.bezierCurveTo(cx-s*1.3,cy+s*.1,cx-s*.8,cy-s*.95,cx,cy-s*.35); g.bezierCurveTo(cx+s*.8,cy-s*.95,cx+s*1.3,cy+s*.1,cx,cy+s*.9); g.closePath(); }
@@ -978,10 +976,10 @@
     const r=cake.recipe; let lastG=null;
     return INGREDIENTS[activeCat].items.map((it,idx)=>{
       const head=it.g!==lastG?`<div class="dz-group">${escapeHtml(it.g)}</div>`:""; lastG=it.g;
-      const sel=r.coat===it.id, n=usedCount(r,it.id);
+      const sel=r.coat===it.id, n=usedCount(r,it.id), tapRole=viewMode==="in"&&mixArtOf(it)?"mix":it.role;
       return head+`<div class="dz-tile ${sel?"sel":""} ${n?"on":""} ${lastPicked===it.id?"pop":""}" style="--i:${idx}">
-          <button class="dz-tbtn" data-act="dz-pick" data-id="${it.id}" aria-label="${ROLE_LABEL[it.role]}: ${escapeHtml(it.n)}"><span class="dz-thumb">${thumbImg(it.id)}</span><span class="dz-tn">${escapeHtml(it.n)}</span></button>
-          <span class="dz-role">${viewMode==="in"&&mixArtOf(it)?ROLE_LABEL.mix:ROLE_LABEL[it.role]}${rolesOf(it).length>1?" +":""}</span>
+          <button class="dz-tbtn" data-act="dz-pick" data-id="${it.id}" aria-label="${ROLE_LABEL[tapRole]}: ${escapeHtml(it.n)}"><span class="dz-thumb">${thumbImg(it.id)}</span><span class="dz-tn">${escapeHtml(it.n)}</span></button>
+          <span class="dz-role">${ROLE_LABEL[tapRole]}${rolesOf(it).length>1?" +":""}</span>
           ${n?`<span class="dz-badge">${n}</span>`:sel?`<span class="dz-badge">✓</span>`:""}
           <button class="dz-tedit" data-act="dz-adjust" data-id="${it.id}" aria-label="Opzioni di ${escapeHtml(it.n)}">${ICON_ADJUST}</button>
         </div>`;
@@ -1113,7 +1111,7 @@
       const ex=(r.mix||(r.mix=[])).find(x=>x.ingId===id);
       if(ex) ex.count=Math.min(99,ex.count+Math.max(2,Math.round(DECO_DEF[art][1]/3)));
       else { if(st.mixTypes>=MAX_MIX){ toast(`Massimo ${MAX_MIX} prodotti nell'impasto. Togline uno prima.`); return; }
-        const x={id:uid(), ingId:id, count:DECO_DEF[art][1], seed:newSeed(), layer:null}; r.mix.push(x); newLayerId=x.id; }
+        const x={id:uid(), ingId:id, count:DECO_DEF[art][1], seed:newSeed(), layer:defaultMixLayer(r.layers.filter(l=>ITEM[l.ingId])).id}; r.mix.push(x); newLayerId=x.id; }
       if(viewMode!=="in"){ viewMode="in"; toast("Vista interna: ora vedi cosa c'è nell'impasto."); }
       cakeAnim=null; refreshDesigner(); return;
     }
@@ -1186,7 +1184,7 @@
     return {status:"saved"};
   }
   const pdfText = s => String(s).replace(/[–—]/g,"-").replace(/[“”]/g,'"').replace(/[’]/g,"'");
-  function slugify(s){ return (s||"").toString().toLowerCase().trim().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"torta"; }
+  function slugify(s){ return (s||"").toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"torta"; }
   // crea la scheda e restituisce {blob, filename, title}; null se la libreria PDF manca
   async function buildPDF(){
     if(!window.jspdf){ toast("La libreria PDF non è stata caricata. Controlla la connessione e ricarica."); return null; }
@@ -1258,8 +1256,9 @@
     const ms=(r.mix||[]).filter(m=>ITEM[m.ingId]); if(ms.length) out.push("Nell'impasto: "+ms.map(m=>`${m.count}× ${nameOf(m.ingId)}`).join(", "));
     return out.join("\n");
   }
+  let pendingPdf=null; // il PDF si prepara all'apertura del pannello: al tocco su "Prepara email" la condivisione parte subito (Safari la consente solo a ridosso del tocco)
   function openEmailSheet(){
-    sheetIng=null;
+    sheetIng=null; pendingPdf=buildPDF();
     $("#dz-sheet-body").innerHTML=`
       <div class="dz-shead"><div><h3>Invia la scheda via email</h3><span class="pc-field-label" style="margin:0;">PDF del progetto “${escapeHtml(cakeTitle())}”</span></div></div>
       <label class="dz-fld" style="grid-template-columns:100px minmax(0,1fr);">Destinatario<input type="email" id="mail-to" inputmode="email" autocomplete="email" placeholder="nome@esempio.it" value="${escapeHtml(readMail())}"></label>
@@ -1274,7 +1273,7 @@
     storeMail(to); closeSheet(); emailPDF(to);
   }
   async function emailPDF(to){
-    const res=await buildPDF(); if(!res) return;
+    const res=await (pendingPdf||buildPDF()); pendingPdf=null; if(!res) return;
     const subject=`Progetto torta: ${res.title}`;
     const body=`Ciao,\n\nti invio la scheda del progetto "${res.title}" creata con Zeelandia Cake Designer.\n\n${recipeSummary()}\n`;
     const file=new File([res.blob],res.filename,{type:"application/pdf"});
