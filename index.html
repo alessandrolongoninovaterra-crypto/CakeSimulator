@@ -310,8 +310,6 @@
   .dz-mixsel{display:block; max-width:100%; margin-top:.25em; border:0; border-radius:8px; padding:.2em .45em; background:rgba(118,118,128,.12); color:var(--purple); font:700 .78em var(--body); cursor:pointer;}
   .dz-shape .dz-seg{flex-wrap:wrap; max-width:100%;}
   .dz-seg button{white-space:nowrap;}
-  .dz-fld input[type=email]{width:100%; min-width:0; min-height:42px; padding:6px 12px; border:0; border-radius:12px; background:#fff; box-shadow:inset 0 0 0 1px var(--line), inset 0 2px 3px rgba(29,5,61,.05); font:600 14px var(--body); color:var(--ink);}
-  .dz-fld input[type=email]:focus{outline:none; box-shadow:inset 0 0 0 2px #7B4FD0, 0 0 0 4px rgba(123,79,208,.15);}
 </style>
 </head>
 <body>
@@ -1040,7 +1038,7 @@
         <div class="pc-footer-note ${st.bases?"ok":"warn"}">${st.bases?"✓ impasto presente":"manca un impasto"}</div>
         <div class="pc-footer-note ${st.hasCoat?"ok":""}">${st.hasCoat?"✓ copertura":"senza copertura"}</div>
       </div>
-      <div class="pc-footer-btns"><button class="pc-btn ghost" data-act="dz-email">✉ Invia via email</button><button class="pc-btn primary" data-act="dz-pdf">⬇ Scheda PDF</button></div>`;
+      <div class="pc-footer-btns"><button class="pc-btn primary" data-act="dz-pdf">⬇ Scheda PDF</button></div>`;
   }
   function render(){
     root.innerHTML=`
@@ -1241,53 +1239,6 @@
     catch(err){ toast(err&&err.code==="declined"?"Salvataggio annullato.":"Impossibile salvare il PDF."); }
   }
 
-  // ===================== INVIO VIA EMAIL =====================
-  // Una pagina HTML non può spedire email da sola: dove il browser condivide file si apre la condivisione
-  // con il PDF allegato; altrimenti il PDF viene scaricato e si apre il programma di posta già compilato.
-  const MAIL_KEY="zcd-mail-to";
-  const readMail=()=>{ try{ return localStorage.getItem(MAIL_KEY)||""; }catch(e){ return ""; } };
-  const storeMail=v=>{ try{ localStorage.setItem(MAIL_KEY,v); }catch(e){} };
-  function recipeSummary(){
-    const r=cake.recipe, ls=r.layers.filter(l=>ITEM[l.ingId]), out=[];
-    out.push(`Forma: ${SHAPE_NAME[r.shape]||"Rotonda"}${hasTiers(r)?`, ${r.tiers||1} ${(r.tiers||1)===1?"piano":"piani"}`:""}`);
-    if(ls.length) out.push("Strati (dal basso): "+ls.map(l=>`${nameOf(l.ingId)} (spessore ${l.thick})`).join(", "));
-    if(r.coat&&ITEM[r.coat]) out.push(`Copertura: ${nameOf(r.coat)} (${Math.round(coatPct(r)*100)}%)`);
-    const ds=r.decos.filter(d=>ITEM[d.ingId]); if(ds.length) out.push("Decorazioni: "+ds.map(d=>`${d.count}× ${nameOf(d.ingId)}`).join(", "));
-    const ms=(r.mix||[]).filter(m=>ITEM[m.ingId]); if(ms.length) out.push("Nell'impasto: "+ms.map(m=>`${m.count}× ${nameOf(m.ingId)}`).join(", "));
-    return out.join("\n");
-  }
-  let pendingPdf=null; // il PDF si prepara all'apertura del pannello: al tocco su "Prepara email" la condivisione parte subito (Safari la consente solo a ridosso del tocco)
-  function openEmailSheet(){
-    sheetIng=null; pendingPdf=buildPDF();
-    $("#dz-sheet-body").innerHTML=`
-      <div class="dz-shead"><div><h3>Invia la scheda via email</h3><span class="pc-field-label" style="margin:0;">PDF del progetto “${escapeHtml(cakeTitle())}”</span></div></div>
-      <label class="dz-fld" style="grid-template-columns:100px minmax(0,1fr);">Destinatario<input type="email" id="mail-to" inputmode="email" autocomplete="email" placeholder="nome@esempio.it" value="${escapeHtml(readMail())}"></label>
-      <button class="pc-btn gold" data-act="email-send">✉ Prepara email con il PDF</button>
-      <p class="pc-settings-note" style="margin:0;">Su tablet e telefono si apre la condivisione con il PDF già allegato: scegli Mail, Outlook o Gmail. Sul computer il PDF viene scaricato e si apre il programma di posta già compilato: trascina il file nell'email.</p>`;
-    $("#dz-sheet").hidden=false;
-    setTimeout(()=>{ const i=$("#mail-to"); if(i) i.focus(); },50);
-  }
-  function sendEmailFromSheet(){
-    const to=($("#mail-to")||{value:""}).value.trim();
-    if(to&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){ toast("Indirizzo email non valido."); return; }
-    storeMail(to); closeSheet(); emailPDF(to);
-  }
-  async function emailPDF(to){
-    const res=await (pendingPdf||buildPDF()); pendingPdf=null; if(!res) return;
-    const subject=`Progetto torta: ${res.title}`;
-    const body=`Ciao,\n\nti invio la scheda del progetto "${res.title}" creata con Zeelandia Cake Designer.\n\n${recipeSummary()}\n`;
-    const file=new File([res.blob],res.filename,{type:"application/pdf"});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{ await navigator.share({files:[file], title:subject, text:body}); toast("Scheda condivisa."); return; }
-      catch(e){ if(e&&e.name==="AbortError"){ toast("Invio annullato."); return; } } // altri errori: si passa al metodo con il download
-    }
-    try{ await saveBlob(res.blob,res.filename); }catch(e){ toast("Impossibile salvare il PDF."); return; }
-    const a=document.createElement("a");
-    a.href=`mailto:${encodeURIComponent(to||"")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body+`\nIn allegato: ${res.filename}`)}`;
-    document.body.appendChild(a); a.click(); a.remove();
-    toast(`PDF scaricato (${res.filename}): allegalo all'email che si è aperta.`);
-  }
-
   // ===================== EVENTI =====================
   document.addEventListener("click", e=>{
     if(e.target.id==="dz-sheet"){ closeSheet(); return; }
@@ -1305,8 +1256,6 @@
       case "dz-shuffle": { r.decos.forEach(d=>{ d.seed=newSeed(); delete d.moved; }); r.layers.forEach(l=>l.seed=newSeed()); const s=$(".dz-stage"); if(s){ s.classList.remove("bounce"); void s.offsetWidth; s.classList.add("bounce"); } cakeAnim=r.decos.length?{deco:r.decos[r.decos.length-1].id,from:0}:null; drawCakeCanvas(); return; }
       case "dz-clear": clearAll(b); return;
       case "dz-pdf": makePDF(); return;
-      case "dz-email": openEmailSheet(); return;
-      case "email-send": sendEmailFromSheet(); return;
       case "dz-rm-coat": r.coat=null; refreshDesigner(); return;
     }
     const li=b.closest("[data-layer]"), ld=b.closest("[data-deco]"), lm=b.closest("[data-mix]");
@@ -1350,10 +1299,7 @@
     if(ld){ const d=r.decos.find(x=>x.id===ld.dataset.deco); if(d) d.count=Math.max(1,Math.min(99,parseInt(t.value,10)||1)); }
     refreshDesigner();
   });
-  document.addEventListener("keydown", e=>{
-    if(e.key==="Escape"&&!$("#dz-sheet").hidden) closeSheet();
-    if(e.key==="Enter"&&e.target.id==="mail-to"){ e.preventDefault(); sendEmailFromSheet(); }
-  });
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape"&&!$("#dz-sheet").hidden) closeSheet(); });
 
   // ---- trascina le decorazioni nel disegno ----
   let drag=null, dragRaf=0;
