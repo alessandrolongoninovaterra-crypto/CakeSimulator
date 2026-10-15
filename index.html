@@ -355,6 +355,15 @@
         ["classico","Classico","#F3CF6A"],["classico_efree","Classico E-free","#F1D27E"],["classico_sl","Classico Senza Lattosio","#F2D58A"]]),
       G("02 Linea Pasticceria Lievitati – Panaton",{},[["panaton","Panaton","#F0C55C"]]),
     ]],
+    // zeelandia.it → Prodotti → Senza glutine → Pasticceria (Pane e Pizza e Speciali non servono per le torte)
+    ["senzaglutine","Senza glutine","basi senza glutine",{role:"layer",kind:"sponge"},[
+      G("Senza glutine – Cake e Frolla",{},[
+        ["sg_nuvola","Nuvola","#F6E09A"],["sg_delicake","Delicake","#F1D79A"],["sg_cuor_di_miele","Cuor di Miele","#E9B95A"],
+        ["sg_cometa","Cometa","#EED9A2","leavened"],["sg_frolla_lf","Frolla LF","#E4B66C","biscuit"]]),
+      G("Senza glutine – Sfoglia e Lievitati",{},[
+        ["sg_gran_sfogliato","Gran Sfogliato","#EAC685","puff"],["sg_lecroissant","LeCroissant","#E8BE78","puff"],
+        ["sg_sfoglia","Sfoglia","#ECCB8E","puff"],["sg_viennoiserie","Viennoiserie","#F0CF8A","leavened"]]),
+    ]],
     ["coperture","Coperture e gelatine","una sola copertura",{role:"coat",kind:"fondant"},[
       G("Glasse, coperture e zuccheri",{},[
         ["decor_paste","Decor Paste","#FBF8F2","fondant"],["fondant_kk","Fondant KK","#FFFDF8","glaze"],["pronto_glassa","Pronto Glassa","#EBD7AE","almondglaze"]]),
@@ -440,7 +449,7 @@
   const nameOf = id => ITEM[id] ? ITEM[id].n : id;
   const catOf  = id => ITEM[id] ? ITEM[id].cat : null;
   const ROLE_LABEL = {layer:"Strato", coat:"Copertura", deco:"Decorazione", mix:"Nell'impasto"};
-  const TAB_SHORT = {impasti:"Impasti", panettoni:"Panettoni", coperture:"Coperture", frutta:"Frutta", cioccolato:"Cioccolato", decorazioni:"Bon Ton", speciali:"Speciali e creme"};
+  const TAB_SHORT = {impasti:"Impasti", panettoni:"Panettoni", senzaglutine:"Senza glutine", coperture:"Coperture", frutta:"Frutta", cioccolato:"Cioccolato", decorazioni:"Bon Ton", speciali:"Speciali e creme"};
   // pezzi che si possono mettere dentro l'impasto (visibili nella vista interna)
   const PIECE_ARTS = new Set(["cherry","cube","strip","berry","raisin","drop","disc","flake","chunk"]);
   function mixArtOf(it){
@@ -466,7 +475,7 @@
   const DECO_DEF = { plaque:[34,1,1,15], basket:[14,4,1,6], wafer:[14,5,1,2], waferheart:[14,5,1,2], heart3d:[11,6,1,4], heart:[6,12,0,1], butterfly:[13,5,1,2],
     flower:[11,6,1,3], leaf:[9,8,0,1], baby:[13,3,1,5], cigar:[16,8,1,3], stripes:[13,6,1,3], fan:[14,6,1,3], curl:[8,10,0,1], snowball:[6,12,0,2], spiral:[15,6,1,3],
     cup:[12,4,1,6], cherry:[7,8,1,6], cube:[4,20,0,1], strip:[7,10,0,3], berry:[6,10,0,2], raisin:[3.5,20,0,.5], drop:[3,30,1,.3], disc:[6,12,0,1], flake:[4.5,30,0,.5], chunk:[5,12,0,4] };
-  // basi "core" (Linea Cake, Paste Montate, Tradizionale, Panettoni): tutto il resto va sopra o dentro
+  // basi "core" (Linea Cake, Paste Montate, Tradizionale, Panettoni, Senza glutine): tutto il resto va sopra o dentro
   const BASE_KINDS = new Set(["sponge","biscuit","puff","leavened"]);
 
   const META = {};
@@ -942,8 +951,9 @@
   }
   function noteHtml(){
     const st=recipeStats(cake.recipe);
-    if(viewMode==="in"&&!["impasti","panettoni","coperture"].includes(activeCat)) return ["","Vista interna: tocca canditi, gocce, cubetti, frutta o croccante per metterli nell'impasto. Nell'elenco scegli in quale strato."];
-    if(activeCat==="impasti") return ["","Ogni tocco aggiunge uno strato in cima. Alterna impasti e farciture."];
+    if(viewMode==="in"&&!["impasti","panettoni","senzaglutine","coperture"].includes(activeCat)) return ["","Vista interna: tocca canditi, gocce, cubetti, frutta o croccante per metterli nell'impasto. Nell'elenco scegli in quale strato."];
+    if(activeCat==="impasti"||activeCat==="panettoni") return ["","Ogni tocco aggiunge uno strato in cima. Alterna impasti e farciture."];
+    if(activeCat==="senzaglutine") return ["","Mix senza glutine Zeelandia: ogni tocco aggiunge uno strato in cima. Controlla che anche farciture e decorazioni siano adatte."];
     if(activeCat==="coperture") return ["","Scegli una copertura; toccala di nuovo per toglierla."];
     if(activeCat==="decorazioni") return [st.decoTypes>=MAX_DECOS?"warn":"",`Tocca per mettere decorazioni, di nuovo per aggiungerne (max ${MAX_DECOS} tipi). Nel disegno trascinale per spostarle; ⟳ le rimette a caso.`];
     if(st.layers>=MAX_LAYERS) return ["warn",`Hai raggiunto ${MAX_LAYERS} strati. Togline uno per aggiungerne altri.`];
